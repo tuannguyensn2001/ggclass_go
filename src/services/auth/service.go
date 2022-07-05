@@ -70,6 +70,7 @@ func (s *service) Login(ctx context.Context, input LoginInput) (*LoginOutput, er
 	}
 
 	user, err := s.repository.FindByEmail(ctx, input.Email)
+	
 	if err != nil {
 		return nil, app.BadRequestHttpError("username or password not valid", err)
 	}
