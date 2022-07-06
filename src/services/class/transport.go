@@ -18,6 +18,8 @@ type IService interface {
 	DeleteMember(ctx context.Context, input DeleteMemberInput, userId int) error
 	GetMembers(ctx context.Context, classId int) ([]GetMembersOutput, error)
 	AcceptInvite(ctx context.Context, userId int, classId int) error
+	GetMyClass(ctx context.Context, userId int) ([]GetMyClassOutput, error)
+	GetPosts(ctx context.Context, classId int) ([]models.Post, error)
 }
 
 type httpTransport struct {
@@ -134,4 +136,44 @@ func (t *httpTransport) AcceptInvite(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{
 		"message": "done",
 	})
+}
+
+func (t *httpTransport) GetMyClass(ctx *gin.Context) {
+	userId, err := auth.GetUserIdFromContext(ctx)
+
+	if err != nil {
+		panic(app.ForbiddenHttpError("forbidden", errors.New("forbidden")))
+	}
+
+	result, err := t.service.GetMyClass(ctx.Request.Context(), userId)
+
+	if err != nil {
+		panic(err)
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "done",
+		"data":    result,
+	})
+
+}
+
+func (t *httpTransport) GetPosts(ctx *gin.Context) {
+	id := ctx.Param("id")
+	classId, err := strconv.Atoi(id)
+	if err != nil {
+		panic(err)
+	}
+
+	result, err := t.service.GetPosts(ctx.Request.Context(), classId)
+
+	if err != nil {
+		panic(err)
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "done",
+		"data":    result,
+	})
+
 }

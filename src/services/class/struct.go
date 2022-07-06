@@ -28,3 +28,8 @@ type GetMembersOutput struct {
 	Role        enums.ClassRole `json:"role"`
 	StatusClass enums.Status    `json:"statusClass"`
 }
+
+type GetMyClassOutput struct {
+	models.Class
+	StatusClass enums.Status `json:"statusClass"`
+}

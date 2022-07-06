@@ -22,19 +22,30 @@ type IRepository interface {
 	GetActiveUsersByClass(ctx context.Context, classId int) ([]models.UserClass, error)
 	SetMemberPending(ctx context.Context, userId int, classId int) error
 	SetMemberActive(ctx context.Context, userId int, classId int) error
+	GetClassActiveByUser(ctx context.Context, userId int) ([]models.UserClass, error)
+	GetClassByIds(ctx context.Context, ids []int) ([]models.Class, error)
 }
 
 type IUserService interface {
 	GetUsersByIds(ctx context.Context, ids []int) ([]models.User, error)
 }
 
+type IPostService interface {
+	GetPostsByClass(ctx context.Context, classId int) ([]models.Post, error)
+}
+
 type service struct {
 	repository  IRepository
 	userService IUserService
+	postService IPostService
 }
 
 func NewService(repository IRepository, userService IUserService) *service {
 	return &service{repository: repository, userService: userService}
+}
+
+func (s *service) SetPostService(postService IPostService) {
+	s.postService = postService
 }
 
 func (s *service) Create(ctx context.Context, input CreateClassInput, userId int) (*models.Class, error) {
@@ -202,4 +213,57 @@ func (s *service) AcceptInvite(ctx context.Context, userId int, classId int) err
 	}
 
 	return s.repository.SetMemberActive(ctx, userId, classId)
+}
+
+func (s *service) GetMyClass(ctx context.Context, userId int) ([]GetMyClassOutput, error) {
+	userClass, err := s.repository.GetClassActiveByUser(ctx, userId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	ids := make([]int, len(userClass))
+	mapStatus := make(map[int]models.UserClass)
+
+	for index, item := range userClass {
+		ids[index] = item.ClassId
+		mapStatus[item.ClassId] = item
+	}
+
+	classes, err := s.repository.GetClassByIds(ctx, ids)
+
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]GetMyClassOutput, len(classes))
+
+	for index, item := range classes {
+		val, _ := mapStatus[item.Id]
+		result[index] = GetMyClassOutput{
+			Class:       item,
+			StatusClass: val.Status,
+		}
+	}
+
+	return result, nil
+
+}
+
+func (s *service) CheckUserExistedInClass(ctx context.Context, userId int, classId int) bool {
+	check, err := s.repository.FindByUserAndClass(ctx, userId, classId)
+
+	if err != nil {
+		return false
+	}
+
+	if check == nil {
+		return false
+	}
+
+	return true
+}
+
+func (s *service) GetPosts(ctx context.Context, classId int) ([]models.Post, error) {
+	return s.postService.GetPostsByClass(ctx, classId)
 }

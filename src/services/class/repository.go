@@ -111,3 +111,26 @@ func (r *repository) SetMemberPending(ctx context.Context, userId int, classId i
 func (r *repository) SetMemberActive(ctx context.Context, userId int, classId int) error {
 	return r.db.Model(models.UserClass{}).Where("user_id = ?", userId).Where("class_id = ?", classId).Update("status", enums.ACTIVE).Error
 }
+
+func (r *repository) GetClassActiveByUser(ctx context.Context, userId int) ([]models.UserClass, error) {
+	var result []models.UserClass
+
+	err := r.db.Where("user_id = ?", userId).Where("status != ?", enums.INACTIVE).Find(&result).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func (r *repository) GetClassByIds(ctx context.Context, ids []int) ([]models.Class, error) {
+	var result []models.Class
+	err := r.db.Where("id IN ?", ids).Find(&result).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}

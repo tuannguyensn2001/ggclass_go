@@ -3,6 +3,7 @@ package auth
 
 import (
 	"context"
+	"errors"
 	"ggclass_go/src/app"
 	"ggclass_go/src/models"
 	"ggclass_go/src/packages/hash"
@@ -70,9 +71,13 @@ func (s *service) Login(ctx context.Context, input LoginInput) (*LoginOutput, er
 	}
 
 	user, err := s.repository.FindByEmail(ctx, input.Email)
-	
+
 	if err != nil {
 		return nil, app.BadRequestHttpError("username or password not valid", err)
+	}
+
+	if user == nil {
+		return nil, app.BadRequestHttpError("username or password not valid", errors.New("username or password not valid"))
 	}
 
 	check := hash.CompareWithContext(ctx, input.Password, user.Password)
