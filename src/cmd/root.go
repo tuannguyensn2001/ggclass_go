@@ -8,6 +8,9 @@ func GetRoot() *cobra.Command {
 	}
 
 	cmdRoot.AddCommand(server())
+	cmdRoot.AddCommand(migrateUp())
+	cmdRoot.AddCommand(migrateDown())
+	cmdRoot.AddCommand(migrateRefresh())
 
 	return cmdRoot
 }

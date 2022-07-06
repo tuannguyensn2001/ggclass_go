@@ -2,7 +2,7 @@ package config
 
 import (
 	"github.com/spf13/viper"
-	"gorm.io/driver/sqlite"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"os"
@@ -29,6 +29,10 @@ func (c *Config) SecretKey() string {
 	return c.secretKey
 }
 
+func (c *Config) GetDBUrl() string {
+	return c.dbUrl
+}
+
 func Load() error {
 	path, _ := os.Getwd()
 
@@ -45,7 +49,7 @@ func Load() error {
 
 	dbUrl := viper.GetString("DB_URL")
 
-	db, err := gorm.Open(sqlite.Open(dbUrl), &gorm.Config{
+	db, err := gorm.Open(postgres.Open(dbUrl), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
 	})
 

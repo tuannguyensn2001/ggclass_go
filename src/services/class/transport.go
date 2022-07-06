@@ -1,0 +1,137 @@
+//go:generate mockgen --source=transport.go --destination=service.mock.go --package=class
+package class
+
+import (
+	"context"
+	"errors"
+	"ggclass_go/src/app"
+	"ggclass_go/src/models"
+	"ggclass_go/src/services/auth"
+	"github.com/gin-gonic/gin"
+	"net/http"
+	"strconv"
+)
+
+type IService interface {
+	Create(ctx context.Context, input CreateClassInput, userId int) (*models.Class, error)
+	AddMember(ctx context.Context, input InviteMemberInput) error
+	DeleteMember(ctx context.Context, input DeleteMemberInput, userId int) error
+	GetMembers(ctx context.Context, classId int) ([]GetMembersOutput, error)
+	AcceptInvite(ctx context.Context, userId int, classId int) error
+}
+
+type httpTransport struct {
+	service IService
+}
+
+func NewHttpTransport(service IService) *httpTransport {
+	return &httpTransport{service: service}
+}
+
+func (t *httpTransport) Create(ctx *gin.Context) {
+	var input CreateClassInput
+	if err := ctx.ShouldBind(&input); err != nil {
+		panic(app.BadRequestHttpError("data not valid", err))
+	}
+
+	userId, err := auth.GetUserIdFromContext(ctx)
+
+	if err != nil {
+		panic(err)
+	}
+
+	class, err := t.service.Create(ctx.Request.Context(), input, userId)
+
+	if err != nil {
+		panic(err)
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "done",
+		"data":    class,
+	})
+
+}
+
+func (t *httpTransport) InviteMember(ctx *gin.Context) {
+	var input InviteMemberInput
+	if err := ctx.ShouldBind(&input); err != nil {
+		panic(app.BadRequestHttpError("data not valid", err))
+	}
+
+	err := t.service.AddMember(ctx.Request.Context(), input)
+
+	if err != nil {
+		panic(err)
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "done",
+	})
+}
+
+func (t *httpTransport) DeleteMember(ctx *gin.Context) {
+	var input DeleteMemberInput
+	if err := ctx.ShouldBind(&input); err != nil {
+		panic(app.BadRequestHttpError("data not valid", err))
+	}
+
+	userId, _ := auth.GetUserIdFromContext(ctx)
+
+	err := t.service.DeleteMember(ctx.Request.Context(), input, userId)
+
+	if err != nil {
+		panic(err)
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "done",
+	})
+
+}
+
+func (t *httpTransport) GetMembers(ctx *gin.Context) {
+	id := ctx.Param("id")
+
+	classId, err := strconv.Atoi(id)
+
+	if err != nil {
+		panic(err)
+	}
+
+	result, err := t.service.GetMembers(ctx, classId)
+
+	if err != nil {
+		panic(err)
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "done",
+		"data":    result,
+	})
+}
+
+func (t *httpTransport) AcceptInvite(ctx *gin.Context) {
+	id := ctx.Param("id")
+
+	classId, err := strconv.Atoi(id)
+	if err != nil {
+		panic(err)
+	}
+
+	userId, err := auth.GetUserIdFromContext(ctx)
+
+	if err != nil {
+		panic(app.ForbiddenHttpError("forbidden", errors.New("forbidden")))
+	}
+
+	err = t.service.AcceptInvite(ctx, userId, classId)
+
+	if err != nil {
+		panic(err)
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "done",
+	})
+}

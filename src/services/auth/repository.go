@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"errors"
 	"ggclass_go/src/models"
 	"gorm.io/gorm"
 )
@@ -21,7 +22,12 @@ func (r *repository) Create(ctx context.Context, user *models.User) error {
 func (r *repository) FindByEmail(ctx context.Context, email string) (*models.User, error) {
 	var user models.User
 	err := r.db.Where("email = ?", email).First(&user).Error
-	if err != nil {
+
+	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
+
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	}
 

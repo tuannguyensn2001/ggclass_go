@@ -45,3 +45,11 @@ func ForbiddenHttpError(message string, err error) *HttpError {
 		Message:    message,
 	}
 }
+
+func NotFoundHttpError(message string, err error) *HttpError {
+	return &HttpError{
+		StatusCode: http.StatusNotFound,
+		RootErr:    err,
+		Message:    message,
+	}
+}
