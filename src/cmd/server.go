@@ -43,7 +43,7 @@ func server() *cobra.Command {
 				Handler: r,
 			})
 			if err != nil {
-				log.Fatalln("err init server")
+				log.Fatalln("err init server", err)
 			}
 		},
 	}
