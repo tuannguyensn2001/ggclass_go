@@ -12,3 +12,6 @@ migrate-down:
 
 migrate-refresh:
 	@go run src/server/main.go migrate-refresh
+
+build:
+	GOOS=windows go build src/server/main.go
