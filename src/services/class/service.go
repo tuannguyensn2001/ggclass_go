@@ -48,7 +48,7 @@ func (s *service) SetPostService(postService IPostService) {
 	s.postService = postService
 }
 
-func (s *service) Create(ctx context.Context, input CreateClassInput, userId int) (*models.Class, error) {
+func (s *service) Create(ctx context.Context, input CreateClassInput, userId int) (*GetMyClassOutput, error) {
 	err := validate.Exec(input)
 	if err != nil {
 		return nil, err
@@ -80,7 +80,10 @@ func (s *service) Create(ctx context.Context, input CreateClassInput, userId int
 		return nil, err
 	}
 
-	return &class, nil
+	return &GetMyClassOutput{
+		Class:       class,
+		StatusClass: enums.ACTIVE,
+	}, nil
 }
 
 func (s *service) AddMember(ctx context.Context, input InviteMemberInput) error {

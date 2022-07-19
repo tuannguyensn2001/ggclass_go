@@ -10,6 +10,8 @@ import (
 type IRepository interface {
 	Create(ctx context.Context, post *models.Post) error
 	FindPostsByClassId(ctx context.Context, classId int) ([]models.Post, error)
+	Delete(ctx context.Context, id int) error
+	FindById(ctx context.Context, id int) (*models.Post, error)
 }
 
 type IClassService interface {
@@ -51,4 +53,18 @@ func (s *service) Create(ctx context.Context, userId int, input CreatePostInput)
 
 func (s *service) GetPostsByClass(ctx context.Context, classId int) ([]models.Post, error) {
 	return s.repository.FindPostsByClassId(ctx, classId)
+}
+
+func (s *service) Delete(ctx context.Context, id int, userId int) error {
+	post, err := s.repository.FindById(ctx, id)
+
+	if err != nil {
+		return err
+	}
+
+	if post.Id != userId {
+		return app.ForbiddenHttpError("don't have permission to delete this post", errors.New("don't have permission"))
+	}
+
+	return s.repository.Delete(ctx, id)
 }

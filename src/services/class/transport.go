@@ -13,7 +13,7 @@ import (
 )
 
 type IService interface {
-	Create(ctx context.Context, input CreateClassInput, userId int) (*models.Class, error)
+	Create(ctx context.Context, input CreateClassInput, userId int) (*GetMyClassOutput, error)
 	AddMember(ctx context.Context, input InviteMemberInput) error
 	DeleteMember(ctx context.Context, input DeleteMemberInput, userId int) error
 	GetMembers(ctx context.Context, classId int) ([]GetMembersOutput, error)

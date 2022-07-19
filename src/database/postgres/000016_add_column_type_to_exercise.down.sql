@@ -1,0 +1,1 @@
+alter table exercise drop column type;

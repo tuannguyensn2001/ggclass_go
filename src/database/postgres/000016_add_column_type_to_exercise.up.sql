@@ -1,0 +1,1 @@
+alter table exercise add type int;

@@ -1,0 +1,1 @@
+alter table exercise add created_by int;

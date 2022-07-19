@@ -1,0 +1,1 @@
+drop table if exists exercise_multiple_choice_answer

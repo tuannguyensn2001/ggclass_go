@@ -4,6 +4,7 @@ import (
 	"ggclass_go/src/middlewares"
 	"ggclass_go/src/services/auth"
 	"ggclass_go/src/services/class"
+	"ggclass_go/src/services/exercise"
 	"ggclass_go/src/services/post"
 	"github.com/gin-gonic/gin"
 )
@@ -26,6 +27,11 @@ type ClassHttpTransport interface {
 
 type PostHttpTransport interface {
 	Create(ctx *gin.Context)
+	Delete(ctx *gin.Context)
+}
+
+type ExerciseHttpTransport interface {
+	CreateMultipleChoice(ctx *gin.Context)
 }
 
 func MatchRoutes(r *gin.Engine) {
@@ -33,6 +39,7 @@ func MatchRoutes(r *gin.Engine) {
 	authTransport := buildAuthTransport()
 	classTransport := buildClassTransport()
 	postTransport := buildPostTransport()
+	exerciseTransport := buildExerciseTransport()
 
 	v1 := r.Group("/api/v1")
 	{
@@ -49,6 +56,9 @@ func MatchRoutes(r *gin.Engine) {
 		v1.GET("/classes/:id/posts", classTransport.GetPosts)
 
 		v1.POST("/posts", middlewares.Auth, postTransport.Create)
+		v1.DELETE("/posts/:id", middlewares.Auth, postTransport.Delete)
+
+		v1.POST("/exercises/multiple-choice", middlewares.Auth, exerciseTransport.CreateMultipleChoice)
 	}
 }
 
@@ -72,5 +82,11 @@ func buildPostTransport() PostHttpTransport {
 	service := post.BuildService()
 	transport := post.NewHttpTransport(service)
 
+	return transport
+}
+
+func buildExerciseTransport() ExerciseHttpTransport {
+	service := exercise.BuildService()
+	transport := exercise.NewHttpTransport(service)
 	return transport
 }

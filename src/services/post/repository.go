@@ -30,3 +30,18 @@ func (r *repository) FindPostsByClassId(ctx context.Context, classId int) ([]mod
 	return result, nil
 
 }
+
+func (r *repository) Delete(ctx context.Context, id int) error {
+	return r.db.Delete(&models.Post{}, id).Error
+}
+
+func (r *repository) FindById(ctx context.Context, id int) (*models.Post, error) {
+	var result models.Post
+	err := r.db.Where("id = ?", id).First(&result).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}

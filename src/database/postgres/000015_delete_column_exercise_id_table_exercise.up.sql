@@ -1,0 +1,1 @@
+alter table exercise_multiple_choice drop column exercise_id;
