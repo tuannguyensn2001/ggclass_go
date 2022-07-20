@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"ggclass_go/src/app"
+	"ggclass_go/src/models"
 	"ggclass_go/src/services/auth"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -11,7 +12,7 @@ import (
 )
 
 type IService interface {
-	Create(ctx context.Context, userId int, input CreatePostInput) error
+	Create(ctx context.Context, userId int, input CreatePostInput) (*models.Post, error)
 	Delete(ctx context.Context, id int, userId int) error
 }
 
@@ -36,7 +37,7 @@ func (t *httpTransport) Create(ctx *gin.Context) {
 		panic(app.ForbiddenHttpError("forbidden", errors.New("forbidden")))
 	}
 
-	err = t.service.Create(ctx.Request.Context(), userId, input)
+	result, err := t.service.Create(ctx.Request.Context(), userId, input)
 
 	if err != nil {
 		panic(err)
@@ -44,6 +45,7 @@ func (t *httpTransport) Create(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"message": "done",
+		"data":    result,
 	})
 
 }

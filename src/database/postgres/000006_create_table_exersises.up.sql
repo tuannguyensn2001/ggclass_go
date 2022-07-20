@@ -1,4 +1,4 @@
-CREATE TABLE exercises (
+CREATE TABLE exercise (
     id serial primary key ,
     name varchar,
     password varchar,

@@ -27,12 +27,12 @@ func NewService(repository IRepository, classService IClassService) *service {
 	return &service{repository: repository, classService: classService}
 }
 
-func (s *service) Create(ctx context.Context, userId int, input CreatePostInput) error {
+func (s *service) Create(ctx context.Context, userId int, input CreatePostInput) (*models.Post, error) {
 
 	check := s.classService.CheckUserExistedInClass(ctx, userId, input.ClassId)
 
 	if !check {
-		return app.ForbiddenHttpError("forbidden", errors.New("forbidden"))
+		return nil, app.ForbiddenHttpError("forbidden", errors.New("forbidden"))
 	}
 
 	post := models.Post{
@@ -44,10 +44,10 @@ func (s *service) Create(ctx context.Context, userId int, input CreatePostInput)
 	err := s.repository.Create(ctx, &post)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return &post, nil
 
 }
 
