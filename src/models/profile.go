@@ -5,13 +5,11 @@ import (
 	"time"
 )
 
-type User struct {
+type Profile struct {
 	Id        int             `gorm:"column:id;" json:"id"`
-	Username  string          `gorm:"column:username;" json:"username"`
-	Email     string          `gorm:"column:email;" json:"email"`
-	Password  string          `gorm:"column:password" json:"-"`
+	UserId    int             `gorm:"column:user_id;" json:"userId"`
+	Avatar    string          `gorm:"column:avatar;" json:"avatar"`
 	CreatedAt *time.Time      `gorm:"column:created_at;" json:"createdAt"`
 	UpdatedAt *time.Time      `gorm:"column:updated_at" json:"updatedAt"`
 	DeletedAt *gorm.DeletedAt `json:"deletedAt"`
-	Profile   Profile         `json:"profile"`
 }

@@ -8,6 +8,6 @@ import (
 func BuildService() *service {
 	repository := NewRepository(config.Cfg.GetDB())
 	classService := class.BuildService()
-	service := NewService(repository, classService)
+	service := NewService(repository, classService, config.Cfg.GetPusher(), config.Cfg.GetRabbitMQ())
 	return service
 }

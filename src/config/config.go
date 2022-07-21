@@ -1,10 +1,13 @@
 package config
 
 import (
+	"github.com/pusher/pusher-http-go"
+	"github.com/rabbitmq/amqp091-go"
 	"github.com/spf13/viper"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
+	"log"
 	"os"
 )
 
@@ -13,6 +16,8 @@ type Config struct {
 	port      string
 	dbUrl     string
 	secretKey string
+	pusher    pusher.Client
+	rabbitMQ  *amqp091.Connection
 }
 
 var Cfg Config
@@ -31,6 +36,14 @@ func (c *Config) SecretKey() string {
 
 func (c *Config) GetDBUrl() string {
 	return c.dbUrl
+}
+
+func (c *Config) GetPusher() pusher.Client {
+	return c.pusher
+}
+
+func (c *Config) GetRabbitMQ() *amqp091.Connection {
+	return c.rabbitMQ
 }
 
 func Load() error {
@@ -57,14 +70,32 @@ func Load() error {
 		return err
 	}
 
+	pusherClient := pusher.Client{
+		AppID:   "1440558",
+		Key:     "26bdb6fd186156c41fe6",
+		Secret:  "708f13f675065ba00a92",
+		Cluster: "ap1",
+		Secure:  true,
+	}
+
 	result := &Config{
-		dbUrl: dbUrl,
-		port:  viper.GetString("PORT"),
-		db:    db,
+		dbUrl:    dbUrl,
+		port:     viper.GetString("PORT"),
+		db:       db,
+		pusher:   pusherClient,
+		rabbitMQ: connectRabbitMq(),
 	}
 
 	Cfg = *result
 
 	return nil
 
+}
+
+func connectRabbitMq() *amqp091.Connection {
+	conn, err := amqp091.Dial(viper.GetString("RABBITMQ_URL"))
+	if err != nil {
+		log.Fatalln("connect failed to rabbit")
+	}
+	return conn
 }

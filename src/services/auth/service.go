@@ -9,6 +9,7 @@ import (
 	"ggclass_go/src/packages/hash"
 	"ggclass_go/src/packages/jwt"
 	"ggclass_go/src/packages/validate"
+	"ggclass_go/src/services/profile"
 	"github.com/go-playground/validator/v10"
 )
 
@@ -19,12 +20,22 @@ type IRepository interface {
 }
 
 type service struct {
-	repository IRepository
-	secretKey  string
+	repository     IRepository
+	secretKey      string
+	profileService IProfileService
+}
+
+type IProfileService interface {
+	GetByUserId(ctx context.Context, userId int) (*models.Profile, error)
+	Create(ctx context.Context, input profile.CreateProfileInput) (*models.Profile, error)
 }
 
 func NewService(repository IRepository, secretKey string) *service {
 	return &service{repository: repository, secretKey: secretKey}
+}
+
+func (s *service) SetProfileService(profileService IProfileService) {
+	s.profileService = profileService
 }
 
 func (s *service) Register(ctx context.Context, input RegisterInput) (*models.User, error) {
@@ -91,6 +102,22 @@ func (s *service) Login(ctx context.Context, input LoginInput) (*LoginOutput, er
 	if err != nil {
 		return nil, err
 	}
+
+	checkProfile, err := s.profileService.GetByUserId(ctx, user.Id)
+	if err != nil {
+		return nil, err
+	}
+	if checkProfile == nil {
+		checkProfile, err = s.profileService.Create(ctx, profile.CreateProfileInput{
+			UserId: user.Id,
+			Avatar: "https://cdn-icons-png.flaticon.com/512/1053/1053244.png?w=360",
+		})
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	user.Profile = *checkProfile
 
 	return &LoginOutput{
 		AccessToken: accessToken,

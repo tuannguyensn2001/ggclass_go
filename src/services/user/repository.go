@@ -27,7 +27,7 @@ func (r *repository) GetByIds(ctx context.Context, ids []int) ([]models.User, er
 
 func (r *repository) FindById(ctx context.Context, userId int) (*models.User, error) {
 	var result models.User
-	err := r.db.Where("id = ?", userId).First(&result).Error
+	err := r.db.Preload("Profile").Where("id = ?", userId).First(&result).Error
 
 	if err != nil {
 		return nil, err

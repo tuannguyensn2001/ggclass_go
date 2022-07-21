@@ -21,7 +21,7 @@ func (r *repository) Create(ctx context.Context, post *models.Post) error {
 func (r *repository) FindPostsByClassId(ctx context.Context, classId int) ([]models.Post, error) {
 	var result []models.Post
 
-	err := r.db.Preload("CreatedByUser").Preload("Comments.CreatedByUser").Where("class_id = ?", classId).Find(&result).Error
+	err := r.db.Preload("CreatedByUser.Profile").Preload("Comments.CreatedByUser.Profile").Where("class_id = ?", classId).Find(&result).Error
 
 	if err != nil {
 		return nil, err

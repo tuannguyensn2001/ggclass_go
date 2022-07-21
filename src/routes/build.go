@@ -7,11 +7,13 @@ import (
 	"ggclass_go/src/services/exercise"
 	"ggclass_go/src/services/folder"
 	"ggclass_go/src/services/post"
+	"ggclass_go/src/services/profile"
 	"ggclass_go/src/services/user"
 )
 
 func buildAuthTransport() AuthHttpTransport {
 	service := auth.BuildService()
+	service.SetProfileService(profile.BuildService())
 	transport := auth.NewHttpTransport(service)
 
 	return transport
@@ -28,6 +30,7 @@ func buildClassTransport() ClassHttpTransport {
 func buildPostTransport() PostHttpTransport {
 
 	service := post.BuildService()
+	service.SetUserService(user.BuildService())
 	transport := post.NewHttpTransport(service)
 
 	return transport

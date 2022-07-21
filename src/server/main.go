@@ -10,6 +10,8 @@ import (
 func main() {
 	err := config.Load()
 
+	defer config.Cfg.GetRabbitMQ().Close()
+
 	fmt.Print("hello")
 
 	if err != nil {
