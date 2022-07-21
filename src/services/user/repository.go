@@ -24,3 +24,15 @@ func (r *repository) GetByIds(ctx context.Context, ids []int) ([]models.User, er
 
 	return result, nil
 }
+
+func (r *repository) FindById(ctx context.Context, userId int) (*models.User, error) {
+	var result models.User
+	err := r.db.Where("id = ?", userId).First(&result).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &result, err
+
+}

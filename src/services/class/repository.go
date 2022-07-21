@@ -134,3 +134,12 @@ func (r *repository) GetClassByIds(ctx context.Context, ids []int) ([]models.Cla
 
 	return result, nil
 }
+
+func (r *repository) FindById(ctx context.Context, id int) (*models.Class, error) {
+	var result models.Class
+	if err := r.db.Where("id = ?", id).First(&result).Error; err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}

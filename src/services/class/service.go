@@ -24,6 +24,7 @@ type IRepository interface {
 	SetMemberActive(ctx context.Context, userId int, classId int) error
 	GetClassActiveByUser(ctx context.Context, userId int) ([]models.UserClass, error)
 	GetClassByIds(ctx context.Context, ids []int) ([]models.Class, error)
+	FindById(ctx context.Context, id int) (*models.Class, error)
 }
 
 type IUserService interface {
@@ -269,4 +270,18 @@ func (s *service) CheckUserExistedInClass(ctx context.Context, userId int, class
 
 func (s *service) GetPosts(ctx context.Context, classId int) ([]models.Post, error) {
 	return s.postService.GetPostsByClass(ctx, classId)
+}
+
+func (s *service) CheckClassExisted(ctx context.Context, classId int) bool {
+	class, err := s.repository.FindById(ctx, classId)
+
+	if err != nil {
+		return false
+	}
+
+	if class == nil {
+		return false
+	}
+
+	return true
 }
