@@ -5,6 +5,7 @@ import (
 	"errors"
 	"ggclass_go/src/app"
 	"ggclass_go/src/models"
+	"gorm.io/gorm"
 )
 
 type IRepository interface {
@@ -67,4 +68,19 @@ func (s *service) Delete(ctx context.Context, id int, userId int) error {
 	}
 
 	return s.repository.Delete(ctx, id)
+}
+
+func (s *service) GetById(ctx context.Context, id int) (*models.Post, error) {
+	result, err := s.repository.FindById(ctx, id)
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, app.NotFoundHttpError("not found post", err)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+
 }

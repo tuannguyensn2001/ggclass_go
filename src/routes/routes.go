@@ -101,6 +101,7 @@ func buildExerciseTransport() ExerciseHttpTransport {
 
 func buildCommentTransport() CommentHttpTransport {
 	service := comment.BuildService()
+	service.SetPostService(post.BuildService())
 	transport := comment.NewHttpTransport(service)
 	return transport
 }
