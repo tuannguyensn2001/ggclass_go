@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"ggclass_go/src/app"
 	"ggclass_go/src/models"
 	"github.com/pusher/pusher-http-go"
@@ -109,6 +110,12 @@ func (s *service) GetById(ctx context.Context, id int) (*models.Post, error) {
 }
 
 func (s *service) PushPostToRabbitMQ(post *models.Post) {
+	err := s.pusher.Trigger(fmt.Sprintf("class-%d-newsfeed", post.ClassId), "create-post", post)
+	if err != nil {
+		log.Println("failed to pusher", err)
+	}
+
+	return
 	ch, err := s.rabbitMQ.Channel()
 	defer ch.Close()
 	if err != nil {
