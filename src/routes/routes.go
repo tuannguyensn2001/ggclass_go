@@ -3,6 +3,7 @@ package routes
 import (
 	"ggclass_go/src/middlewares"
 	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
 func MatchRoutes(r *gin.Engine) {
@@ -13,6 +14,12 @@ func MatchRoutes(r *gin.Engine) {
 	exerciseTransport := buildExerciseTransport()
 	commentTransport := buildCommentTransport()
 	folderTransport := buildFolderTransport()
+
+	r.GET("/", func(context *gin.Context) {
+		context.JSON(http.StatusOK, gin.H{
+			"message": "gg_class_api",
+		})
+	})
 
 	v1 := r.Group("/api/v1")
 	{
