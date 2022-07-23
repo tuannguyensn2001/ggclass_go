@@ -115,7 +115,7 @@ func (r *repository) SetMemberActive(ctx context.Context, userId int, classId in
 func (r *repository) GetClassActiveByUser(ctx context.Context, userId int) ([]models.UserClass, error) {
 	var result []models.UserClass
 
-	err := r.db.Where("user_id = ?", userId).Where("status != ?", enums.INACTIVE).Find(&result).Error
+	err := r.db.Where("user_id = ?", userId).Where("status != ?", enums.INACTIVE).Where("role = ?", enums.STUDENT).Find(&result).Error
 
 	if err != nil {
 		return nil, err

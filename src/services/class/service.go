@@ -29,6 +29,7 @@ type IRepository interface {
 
 type IUserService interface {
 	GetUsersByIds(ctx context.Context, ids []int) ([]models.User, error)
+	GetByEmail(ctx context.Context, email string) (*models.User, error)
 }
 
 type IPostService interface {
@@ -88,7 +89,13 @@ func (s *service) Create(ctx context.Context, input CreateClassInput, userId int
 }
 
 func (s *service) AddMember(ctx context.Context, input InviteMemberInput) error {
-	check, err := s.repository.FindByUserAndClass(ctx, input.UserId, input.ClassId)
+
+	user, err := s.userService.GetByEmail(ctx, input.Email)
+	if err != nil {
+		return err
+	}
+
+	check, err := s.repository.FindByUserAndClass(ctx, user.Id, input.ClassId)
 
 	if err != nil {
 		return nil
@@ -113,7 +120,7 @@ func (s *service) AddMember(ctx context.Context, input InviteMemberInput) error 
 			UserId:  input.UserId,
 			ClassId: input.ClassId,
 			Role:    input.Role,
-			Status:  enums.PENDING,
+			Status:  enums.ACTIVE,
 		}
 
 		err = s.repository.AddMember(ctx, &userClass)

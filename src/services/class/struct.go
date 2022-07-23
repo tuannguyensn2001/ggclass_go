@@ -13,9 +13,10 @@ type CreateClassInput struct {
 }
 
 type InviteMemberInput struct {
-	UserId  int             `form:"userId" binding:"required" validate:"required"`
+	UserId  int             `form:"userId" `
 	ClassId int             `form:"classId" binding:"required" validate:"required"`
 	Role    enums.ClassRole `form:"role" binding:"required" validate:"required,min=1,max=3"`
+	Email   string          `form:"email" binding:"required"`
 }
 
 type DeleteMemberInput struct {
