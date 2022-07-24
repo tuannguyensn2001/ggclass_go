@@ -92,7 +92,7 @@ func (s *service) Create(ctx context.Context, input CreateClassInput, userId int
 func (s *service) AddMember(ctx context.Context, input InviteMemberInput) (*models.User, error) {
 
 	user, err := s.userService.GetByEmail(ctx, input.Email)
-	if err != nil {
+	if err != nil || user == nil {
 		return nil, err
 	}
 
