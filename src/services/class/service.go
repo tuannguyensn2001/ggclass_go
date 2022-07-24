@@ -110,7 +110,7 @@ func (s *service) AddMember(ctx context.Context, input InviteMemberInput) (*mode
 			return nil, app.ConflictHttpError("user existed in class", errors.New("user existed in class"))
 		}
 
-		err := s.repository.SetMemberActive(ctx, input.UserId, input.ClassId)
+		err := s.repository.SetMemberActive(ctx, user.Id, input.ClassId)
 		if err != nil {
 			return nil, err
 		}
