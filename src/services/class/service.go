@@ -89,30 +89,30 @@ func (s *service) Create(ctx context.Context, input CreateClassInput, userId int
 	}, nil
 }
 
-func (s *service) AddMember(ctx context.Context, input InviteMemberInput) error {
+func (s *service) AddMember(ctx context.Context, input InviteMemberInput) (*models.User, error) {
 
 	user, err := s.userService.GetByEmail(ctx, input.Email)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	check, err := s.repository.FindByUserAndClass(ctx, user.Id, input.ClassId)
 
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
 	if check != nil {
 		if check.Status == enums.PENDING {
-			return app.ConflictHttpError("user invited", errors.New("user invited"))
+			return nil, app.ConflictHttpError("user invited", errors.New("user invited"))
 		}
 		if check.Status == enums.ACTIVE {
-			return app.ConflictHttpError("user existed in class", errors.New("user existed in class"))
+			return nil, app.ConflictHttpError("user existed in class", errors.New("user existed in class"))
 		}
 
 		err := s.repository.SetMemberActive(ctx, input.UserId, input.ClassId)
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 	} else {
@@ -127,11 +127,11 @@ func (s *service) AddMember(ctx context.Context, input InviteMemberInput) error 
 		err = s.repository.AddMember(ctx, &userClass)
 
 		if err != nil {
-			return err
+			return nil, err
 		}
 	}
 
-	return nil
+	return user, nil
 }
 
 func (s *service) DeleteMember(ctx context.Context, input DeleteMemberInput, userId int) error {

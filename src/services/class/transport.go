@@ -14,7 +14,7 @@ import (
 
 type IService interface {
 	Create(ctx context.Context, input CreateClassInput, userId int) (*GetMyClassOutput, error)
-	AddMember(ctx context.Context, input InviteMemberInput) error
+	AddMember(ctx context.Context, input InviteMemberInput) (*models.User, error)
 	DeleteMember(ctx context.Context, input DeleteMemberInput, userId int) error
 	GetMembers(ctx context.Context, classId int) ([]GetMembersOutput, error)
 	AcceptInvite(ctx context.Context, userId int, classId int) error
@@ -61,7 +61,7 @@ func (t *httpTransport) InviteMember(ctx *gin.Context) {
 		panic(app.BadRequestHttpError("data not valid", err))
 	}
 
-	err := t.service.AddMember(ctx.Request.Context(), input)
+	result, err := t.service.AddMember(ctx.Request.Context(), input)
 
 	if err != nil {
 		panic(err)
@@ -69,6 +69,7 @@ func (t *httpTransport) InviteMember(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"message": "done",
+		"data":    result,
 	})
 }
 
