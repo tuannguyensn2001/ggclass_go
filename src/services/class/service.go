@@ -118,7 +118,7 @@ func (s *service) AddMember(ctx context.Context, input InviteMemberInput) (*mode
 	} else {
 
 		userClass := models.UserClass{
-			UserId:  input.UserId,
+			UserId:  user.Id,
 			ClassId: input.ClassId,
 			Role:    input.Role,
 			Status:  enums.ACTIVE,
