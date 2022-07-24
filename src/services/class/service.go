@@ -20,6 +20,7 @@ type IRepository interface {
 	SetMemberInactive(ctx context.Context, userId int, classId int) error
 	GetUsersByClass(ctx context.Context, classId int) ([]models.UserClass, error)
 	GetActiveUsersByClass(ctx context.Context, classId int) ([]models.UserClass, error)
+	GetActiveStudentsByClass(ctx context.Context, classId int) ([]models.UserClass, error)
 	SetMemberPending(ctx context.Context, userId int, classId int) error
 	SetMemberActive(ctx context.Context, userId int, classId int) error
 	GetClassActiveByUser(ctx context.Context, userId int) ([]models.UserClass, error)
@@ -166,7 +167,7 @@ func (s *service) DeleteMember(ctx context.Context, input DeleteMemberInput, use
 }
 
 func (s *service) GetMembers(ctx context.Context, classId int) ([]GetMembersOutput, error) {
-	ids, err := s.repository.GetActiveUsersByClass(ctx, classId)
+	ids, err := s.repository.GetActiveStudentsByClass(ctx, classId)
 
 	if err != nil {
 		return nil, err

@@ -104,6 +104,18 @@ func (r *repository) GetActiveUsersByClass(ctx context.Context, classId int) ([]
 	return ids, nil
 }
 
+func (r *repository) GetActiveStudentsByClass(ctx context.Context, classId int) ([]models.UserClass, error) {
+	var ids []models.UserClass
+
+	err := r.db.Model(models.UserClass{}).Where("class_id = ?", classId).Where("status != ?", enums.INACTIVE).Where("role = ?", enums.STUDENT).Find(&ids).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return ids, nil
+}
+
 func (r *repository) SetMemberPending(ctx context.Context, userId int, classId int) error {
 	return r.db.Model(models.UserClass{}).Where("user_id = ?", userId).Where("class_id = ?", classId).Update("status", enums.PENDING).Error
 }
