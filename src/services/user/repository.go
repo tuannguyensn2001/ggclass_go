@@ -16,7 +16,7 @@ func NewRepository(db *gorm.DB) *repository {
 
 func (r *repository) GetByIds(ctx context.Context, ids []int) ([]models.User, error) {
 	var result []models.User
-	err := r.db.Where("id IN ?", ids).Find(&result).Error
+	err := r.db.Where("id IN ?", ids).Preload("Profile").Find(&result).Error
 
 	if err != nil {
 		return nil, err
