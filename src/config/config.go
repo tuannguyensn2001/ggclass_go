@@ -79,11 +79,12 @@ func Load() error {
 	}
 
 	result := &Config{
-		dbUrl:    dbUrl,
-		port:     viper.GetString("PORT"),
-		db:       db,
-		pusher:   pusherClient,
-		rabbitMQ: connectRabbitMq(),
+		dbUrl:     dbUrl,
+		port:      viper.GetString("PORT"),
+		db:        db,
+		pusher:    pusherClient,
+		rabbitMQ:  connectRabbitMq(),
+		secretKey: viper.GetString("APP_KEY"),
 	}
 
 	Cfg = *result

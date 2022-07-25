@@ -155,3 +155,11 @@ func (r *repository) FindById(ctx context.Context, id int) (*models.Class, error
 
 	return &result, nil
 }
+
+func (r *repository) FindByCode(ctx context.Context, code string) (*models.Class, error) {
+	var result models.Class
+	if err := r.db.Where("code = ?", code).First(&result).Error; err != nil {
+		return nil, err
+	}
+	return &result, nil
+}

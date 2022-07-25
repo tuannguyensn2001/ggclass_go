@@ -62,6 +62,7 @@ func (s *service) Edit(ctx context.Context, id int, input EditLessonInput) (*mod
 	lesson.Name = input.Name
 	lesson.Description = input.Description
 	lesson.YoutubeLink = input.YoutubeLink
+	lesson.FolderId = input.FolderId
 
 	err = s.repository.Update(ctx, lesson)
 	if err != nil {

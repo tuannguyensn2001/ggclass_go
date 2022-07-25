@@ -10,6 +10,7 @@ import (
 	"ggclass_go/src/models"
 	"ggclass_go/src/packages/str"
 	"ggclass_go/src/packages/validate"
+	"gorm.io/gorm"
 )
 
 type IRepository interface {
@@ -26,6 +27,7 @@ type IRepository interface {
 	GetClassActiveByUser(ctx context.Context, userId int) ([]models.UserClass, error)
 	GetClassByIds(ctx context.Context, ids []int) ([]models.Class, error)
 	FindById(ctx context.Context, id int) (*models.Class, error)
+	FindByCode(ctx context.Context, code string) (*models.Class, error)
 }
 
 type IUserService interface {
@@ -292,4 +294,16 @@ func (s *service) CheckClassExisted(ctx context.Context, classId int) bool {
 	}
 
 	return true
+}
+
+func (s *service) GetByCode(ctx context.Context, code string) (*models.Class, error) {
+	class, err := s.repository.FindByCode(ctx, code)
+	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	return class, nil
 }

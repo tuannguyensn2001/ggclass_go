@@ -6,6 +6,7 @@ import (
 	"ggclass_go/src/services/comment"
 	"ggclass_go/src/services/exercise"
 	"ggclass_go/src/services/folder"
+	"ggclass_go/src/services/members"
 	"ggclass_go/src/services/post"
 	"ggclass_go/src/services/profile"
 	"ggclass_go/src/services/user"
@@ -54,5 +55,12 @@ func buildFolderTransport() FolderHttpTransport {
 	service := folder.BuildService()
 	service.SetClassService(class.BuildService())
 	transport := folder.NewHttpTransport(service)
+	return transport
+}
+
+func buildMemberTransport() MemberHttpTransport {
+	service := members.BuildService()
+	service.SetClassService(class.BuildService())
+	transport := members.NewHttpTransport(service)
 	return transport
 }

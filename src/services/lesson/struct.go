@@ -11,4 +11,5 @@ type EditLessonInput struct {
 	Name        string `form:"name" binding:"required"`
 	Description string `form:"description"`
 	YoutubeLink string `form:"youtubeLink" binding:"required"`
+	FolderId    int    `form:"folderId" binding:"required"`
 }

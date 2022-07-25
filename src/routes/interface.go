@@ -35,3 +35,9 @@ type FolderHttpTransport interface {
 	Create(ctx *gin.Context)
 	GetFolders(ctx *gin.Context)
 }
+
+type MemberHttpTransport interface {
+	JoinClass(ctx *gin.Context)
+	AcceptInvite(ctx *gin.Context)
+	GetStudentsPendingByClass(ctx *gin.Context)
+}

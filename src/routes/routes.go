@@ -14,6 +14,7 @@ func MatchRoutes(r *gin.Engine) {
 	exerciseTransport := buildExerciseTransport()
 	commentTransport := buildCommentTransport()
 	folderTransport := buildFolderTransport()
+	memberTransport := buildMemberTransport()
 
 	r.GET("/", func(context *gin.Context) {
 		context.JSON(http.StatusOK, gin.H{
@@ -44,5 +45,9 @@ func MatchRoutes(r *gin.Engine) {
 
 		v1.POST("/folders", middlewares.Auth, folderTransport.Create)
 		v1.GET("/folders", folderTransport.GetFolders)
+
+		v1.POST("/members", middlewares.Auth, memberTransport.JoinClass)
+		v1.PUT("/members", middlewares.Auth, memberTransport.AcceptInvite)
+		v1.GET("/members/class/:id/pending", memberTransport.GetStudentsPendingByClass)
 	}
 }
