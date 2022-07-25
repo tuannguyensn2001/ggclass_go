@@ -41,3 +41,7 @@ type MemberHttpTransport interface {
 	AcceptInvite(ctx *gin.Context)
 	GetStudentsPendingByClass(ctx *gin.Context)
 }
+
+type AssignmentHttpTransport interface {
+	Start(ctx *gin.Context)
+}

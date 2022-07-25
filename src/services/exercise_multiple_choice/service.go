@@ -11,6 +11,8 @@ type IRepository interface {
 	CreateMultipleChoiceAnswer(ctx context.Context, answers []models.ExerciseMultipleChoiceAnswer) error
 	GetTransaction() *gorm.DB
 	SetDB(db *gorm.DB)
+	FindById(ctx context.Context, id int) (*models.ExerciseMultipleChoice, error)
+	FindAnswersByMultipleChoiceId(ctx context.Context, id int) ([]models.ExerciseMultipleChoiceAnswer, error)
 }
 
 type service struct {
@@ -68,4 +70,12 @@ func (s *service) Create(ctx context.Context, input CreateMultipleChoiceInput, e
 
 	return nil
 
+}
+
+func (s *service) GetById(ctx context.Context, id int) (*models.ExerciseMultipleChoice, error) {
+	return s.repository.FindById(ctx, id)
+}
+
+func (s *service) GetAnswers(ctx context.Context, exerciseMultipleChoiceId int) ([]models.ExerciseMultipleChoiceAnswer, error) {
+	return s.repository.FindAnswersByMultipleChoiceId(ctx, exerciseMultipleChoiceId)
 }

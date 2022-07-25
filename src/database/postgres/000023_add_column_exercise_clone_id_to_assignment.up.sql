@@ -1,0 +1,1 @@
+alter table assignments add exercise_clone_id int;

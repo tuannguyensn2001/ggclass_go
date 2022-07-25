@@ -1,0 +1,20 @@
+create table exercises_clone (
+    id serial primary key ,
+    name varchar,
+    password varchar,
+    time_to_do int,
+    time_start timestamp,
+    time_end timestamp,
+    is_test smallint,
+    prevent_view_question smallint,
+    role_student smallint,
+    number_of_time_to_do int,
+    mode smallint,
+    type smallint,
+    type_id smallint,
+    class_id int,
+    created_by int,
+    created_at timestamp,
+    updated_at timestamp,
+    deleted_at timestamp
+)

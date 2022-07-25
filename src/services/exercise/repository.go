@@ -45,3 +45,11 @@ func (r *repository) SetDB(db *gorm.DB) {
 func (r *repository) GetDB() *gorm.DB {
 	return r.db
 }
+
+func (r *repository) FindById(ctx context.Context, id int) (*models.Exercise, error) {
+	var result models.Exercise
+	if err := r.db.Where("id = ?", id).First(&result).Error; err != nil {
+		return nil, err
+	}
+	return &result, nil
+}

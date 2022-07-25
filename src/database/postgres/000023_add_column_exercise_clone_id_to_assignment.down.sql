@@ -1,0 +1,1 @@
+alter table assignments drop column exercise_clone_id;

@@ -17,14 +17,24 @@ type IRepository interface {
 	GetBeginTransaction() *gorm.DB
 	GetDB() *gorm.DB
 	SetDB(db *gorm.DB)
+	FindById(ctx context.Context, id int) (*models.Exercise, error)
 }
 
 type service struct {
-	repository IRepository
+	repository           IRepository
+	exerciseCloneService IExerciseCloneService
+}
+
+type IExerciseCloneService interface {
+	StartClone(ctx context.Context, exerciseId int) (int, error)
 }
 
 func NewService(repository IRepository) *service {
 	return &service{repository: repository}
+}
+
+func (s *service) SetExerciseCloneService(exerciseCloneService IExerciseCloneService) {
+	s.exerciseCloneService = exerciseCloneService
 }
 
 func (s *service) CreateMultipleChoice(ctx context.Context, input CreateExerciseMultipleChoiceInput, userId int) (*models.Exercise, error) {
@@ -46,6 +56,7 @@ func (s *service) CreateMultipleChoice(ctx context.Context, input CreateExercise
 		ClassId:             input.ClassId,
 		CreatedBy:           userId,
 		Type:                enums.MultipleChoice,
+		Version:             1,
 	}
 
 	if len(input.TimeStart) > 0 {
@@ -110,5 +121,10 @@ func (s *service) CreateMultipleChoice(ctx context.Context, input CreateExercise
 	}
 
 	tx.Commit()
+	go s.exerciseCloneService.StartClone(ctx, exercise.Id)
 	return &exercise, nil
+}
+
+func (s *service) GetById(ctx context.Context, id int) (*models.Exercise, error) {
+	return s.repository.FindById(ctx, id)
 }

@@ -38,3 +38,20 @@ func (r *repository) CreateMultipleChoiceAnswer(ctx context.Context, answers []m
 func (r *repository) GetTransaction() *gorm.DB {
 	return r.db.Begin()
 }
+
+func (r *repository) FindById(ctx context.Context, id int) (*models.ExerciseMultipleChoice, error) {
+	var result models.ExerciseMultipleChoice
+	if err := r.db.Where("id  = ?", id).First(&result).Error; err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func (r *repository) FindAnswersByMultipleChoiceId(ctx context.Context, id int) ([]models.ExerciseMultipleChoiceAnswer, error) {
+	var result []models.ExerciseMultipleChoiceAnswer
+	if err := r.db.Where("exercise_multiple_choice_id = ?", id).Find(&result).Error; err != nil {
+		return nil, err
+
+	}
+	return result, nil
+}

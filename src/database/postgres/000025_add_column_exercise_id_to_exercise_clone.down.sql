@@ -1,0 +1,1 @@
+alter table exercises_clone drop column exercise_id;

@@ -6,8 +6,9 @@ import (
 	"time"
 )
 
-type Exercise struct {
+type ExerciseClone struct {
 	Id                  int                       `gorm:"column:id;" json:"id"`
+	ExerciseId          int                       `gorm:"column:exercise_id;" json:"exerciseId"`
 	Name                string                    `gorm:"column:name;" json:"name"`
 	Password            string                    `gorm:"column:password;" json:"password"`
 	TimeToDo            int                       `gorm:"column:time_to_do;" json:"timeToDo"`
@@ -28,6 +29,6 @@ type Exercise struct {
 	Version             int                       `gorm:"column:version;" json:"version"`
 }
 
-func (e Exercise) TableName() string {
-	return "exercise"
+func (e ExerciseClone) TableName() string {
+	return "exercises_clone"
 }

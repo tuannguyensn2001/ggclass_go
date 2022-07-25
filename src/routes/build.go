@@ -1,10 +1,13 @@
 package routes
 
 import (
+	"ggclass_go/src/services/assignment"
 	"ggclass_go/src/services/auth"
 	"ggclass_go/src/services/class"
 	"ggclass_go/src/services/comment"
 	"ggclass_go/src/services/exercise"
+	"ggclass_go/src/services/exercise_clone"
+	"ggclass_go/src/services/exercise_multiple_choice"
 	"ggclass_go/src/services/folder"
 	"ggclass_go/src/services/members"
 	"ggclass_go/src/services/post"
@@ -39,6 +42,11 @@ func buildPostTransport() PostHttpTransport {
 
 func buildExerciseTransport() ExerciseHttpTransport {
 	service := exercise.BuildService()
+	exerciseCloneService := exercise_clone.BuildService()
+	exerciseCloneService.SetExerciseService(service)
+	exerciseCloneService.SetExerciseMultipleChoiceService(exercise_multiple_choice.BuildService())
+
+	service.SetExerciseCloneService(exerciseCloneService)
 	transport := exercise.NewHttpTransport(service)
 	return transport
 }
@@ -63,4 +71,14 @@ func buildMemberTransport() MemberHttpTransport {
 	service.SetClassService(class.BuildService())
 	transport := members.NewHttpTransport(service)
 	return transport
+}
+
+func buildAssignmentTransport() AssignmentHttpTransport {
+	service := assignment.BuildService()
+	exerciseCloneService := exercise_clone.BuildService()
+	exerciseCloneService.SetExerciseService(exercise.BuildService())
+	exerciseCloneService.SetExerciseMultipleChoiceService(exercise_multiple_choice.BuildService())
+	service.SetExerciseCloneService(exerciseCloneService)
+
+	return assignment.NewHttpTransport(service)
 }

@@ -1,0 +1,1 @@
+drop table if exists exercises_multiple_choice_answers_clone;
