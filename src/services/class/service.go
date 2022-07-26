@@ -10,6 +10,7 @@ import (
 	"ggclass_go/src/models"
 	"ggclass_go/src/packages/str"
 	"ggclass_go/src/packages/validate"
+	"github.com/go-redis/redis/v8"
 	"gorm.io/gorm"
 )
 
@@ -43,10 +44,11 @@ type service struct {
 	repository  IRepository
 	userService IUserService
 	postService IPostService
+	rds         *redis.Client
 }
 
-func NewService(repository IRepository, userService IUserService) *service {
-	return &service{repository: repository, userService: userService}
+func NewService(repository IRepository, userService IUserService, rds *redis.Client) *service {
+	return &service{repository: repository, userService: userService, rds: rds}
 }
 
 func (s *service) SetPostService(postService IPostService) {
@@ -70,6 +72,11 @@ func (s *service) Create(ctx context.Context, input CreateClassInput, userId int
 	}
 
 	code := str.Random(5)
+
+	err = s.rds.Set(ctx, "class_code_"+code, true, 0).Err()
+	if err != nil {
+		return nil, err
+	}
 
 	class := models.Class{
 		Name:        input.Name,

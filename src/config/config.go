@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/go-redis/redis/v8"
 	"github.com/pusher/pusher-http-go"
 	"github.com/rabbitmq/amqp091-go"
 	"github.com/spf13/viper"
@@ -18,6 +19,7 @@ type Config struct {
 	secretKey string
 	pusher    pusher.Client
 	rabbitMQ  *amqp091.Connection
+	rds       *redis.Client
 }
 
 var Cfg Config
@@ -44,6 +46,10 @@ func (c *Config) GetPusher() pusher.Client {
 
 func (c *Config) GetRabbitMQ() *amqp091.Connection {
 	return c.rabbitMQ
+}
+
+func (c *Config) GetRedis() *redis.Client {
+	return c.rds
 }
 
 func Load() error {
@@ -85,6 +91,10 @@ func Load() error {
 		pusher:    pusherClient,
 		rabbitMQ:  connectRabbitMq(),
 		secretKey: viper.GetString("APP_KEY"),
+		rds: redis.NewClient(&redis.Options{
+			Addr:     "redis-17404.c299.asia-northeast1-1.gce.cloud.redislabs.com:17404",
+			Password: "oVzG4E5NyOWCLaYU1II0021uR6rwj2yp",
+		}),
 	}
 
 	Cfg = *result
