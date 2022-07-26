@@ -107,7 +107,7 @@ func (r *repository) GetActiveUsersByClass(ctx context.Context, classId int) ([]
 func (r *repository) GetActiveStudentsByClass(ctx context.Context, classId int) ([]models.UserClass, error) {
 	var ids []models.UserClass
 
-	err := r.db.Model(models.UserClass{}).Where("class_id = ?", classId).Where("status =", enums.ACTIVE).Where("role = ?", enums.STUDENT).Find(&ids).Error
+	err := r.db.Model(models.UserClass{}).Where("class_id = ?", classId).Where("status = ?", enums.ACTIVE).Where("role = ?", enums.STUDENT).Find(&ids).Error
 
 	if err != nil {
 		return nil, err
@@ -162,4 +162,12 @@ func (r *repository) FindByCode(ctx context.Context, code string) (*models.Class
 		return nil, err
 	}
 	return &result, nil
+}
+
+func (r *repository) GetAll(ctx context.Context) ([]models.Class, error) {
+	var result []models.Class
+	if err := r.db.Select("code").Find(&result).Error; err != nil {
+		return nil, err
+	}
+	return result, nil
 }

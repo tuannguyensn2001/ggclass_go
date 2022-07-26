@@ -29,6 +29,7 @@ type IRepository interface {
 	GetClassByIds(ctx context.Context, ids []int) ([]models.Class, error)
 	FindById(ctx context.Context, id int) (*models.Class, error)
 	FindByCode(ctx context.Context, code string) (*models.Class, error)
+	GetAll(ctx context.Context) ([]models.Class, error)
 }
 
 type IUserService interface {
@@ -55,6 +56,46 @@ func (s *service) SetPostService(postService IPostService) {
 	s.postService = postService
 }
 
+func (s *service) GetCodes(ctx context.Context) ([]string, error) {
+	classes, err := s.repository.GetAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]string, len(classes))
+
+	for index, item := range classes {
+		result[index] = item.Code
+	}
+
+	return result, nil
+}
+
+func (s *service) GenCode(ctx context.Context) (string, error) {
+	codes, err := s.GetCodes(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	check := make(map[string]bool)
+
+	for _, item := range codes {
+		check[item] = true
+	}
+
+	code := str.Random(5)
+
+	for i := 1; i >= 1; i++ {
+		_, exist := check[code]
+		if !exist {
+			break
+		}
+		code = str.Random(5)
+	}
+
+	return code, nil
+
+}
+
 func (s *service) Create(ctx context.Context, input CreateClassInput, userId int) (*GetMyClassOutput, error) {
 	err := validate.Exec(input)
 	if err != nil {
@@ -63,7 +104,7 @@ func (s *service) Create(ctx context.Context, input CreateClassInput, userId int
 
 	check, err := s.repository.FindByNameAndCreateBy(ctx, input.Name, userId)
 
-	if err != nil {
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	}
 
@@ -71,9 +112,8 @@ func (s *service) Create(ctx context.Context, input CreateClassInput, userId int
 		return nil, app.ConflictHttpError("class existed", errors.New("class existed"))
 	}
 
-	code := str.Random(5)
+	code, err := s.GenCode(ctx)
 
-	err = s.rds.Set(ctx, "class_code_"+code, true, 0).Err()
 	if err != nil {
 		return nil, err
 	}
