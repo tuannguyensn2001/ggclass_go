@@ -69,6 +69,7 @@ func buildFolderTransport() FolderHttpTransport {
 func buildMemberTransport() MemberHttpTransport {
 	service := members.BuildService()
 	service.SetClassService(class.BuildService())
+	service.SetUserService(user.BuildService())
 	transport := members.NewHttpTransport(service)
 	return transport
 }
