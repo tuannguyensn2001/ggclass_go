@@ -107,7 +107,7 @@ func (r *repository) GetActiveUsersByClass(ctx context.Context, classId int) ([]
 func (r *repository) GetActiveStudentsByClass(ctx context.Context, classId int) ([]models.UserClass, error) {
 	var ids []models.UserClass
 
-	err := r.db.Model(models.UserClass{}).Where("class_id = ?", classId).Where("status != ?", enums.INACTIVE).Where("role = ?", enums.STUDENT).Find(&ids).Error
+	err := r.db.Model(models.UserClass{}).Where("class_id = ?", classId).Where("status =", enums.ACTIVE).Where("role = ?", enums.STUDENT).Find(&ids).Error
 
 	if err != nil {
 		return nil, err
