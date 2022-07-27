@@ -76,3 +76,16 @@ func (s *service) Edit(ctx context.Context, id int, input EditLessonInput) (*mod
 func (s *service) GetByFolderId(ctx context.Context, folderId int) ([]models.Lesson, error) {
 	return s.repository.FindByFolderId(ctx, folderId)
 }
+
+func (s *service) GetDetail(ctx context.Context, id int) (*models.Lesson, error) {
+	lesson, err := s.repository.FindById(ctx, id)
+
+	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, app.ParseError("general.notFound")
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	return lesson, nil
+}

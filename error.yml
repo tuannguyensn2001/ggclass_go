@@ -1,0 +1,24 @@
+general:
+    badRequest:
+        code: 3
+        message: bad request
+        statusCode: 400
+    conflict:
+        code: 5
+        message: conflict
+        statusCode: 409
+    notFound:
+        code: 1
+        message: done
+        statusCode: 404
+    forbidden:
+        code: 2
+        message: forbidden
+        statusCode: 403
+    
+class:
+    exist:
+        code: 4
+        message: class existed
+        statusCode: 409
+    

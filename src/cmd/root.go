@@ -11,6 +11,7 @@ func GetRoot() *cobra.Command {
 	cmdRoot.AddCommand(migrateUp())
 	cmdRoot.AddCommand(migrateDown())
 	cmdRoot.AddCommand(migrateRefresh())
+	cmdRoot.AddCommand(genError())
 
 	return cmdRoot
 }

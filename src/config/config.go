@@ -56,8 +56,8 @@ func Load() error {
 	path, _ := os.Getwd()
 
 	viper.AddConfigPath(path)
-	viper.SetConfigName(".env")
-	viper.SetConfigType("env")
+	viper.SetConfigName("config")
+	viper.SetConfigType("yml")
 	viper.AutomaticEnv()
 
 	err := viper.ReadInConfig()
@@ -66,7 +66,8 @@ func Load() error {
 		return err
 	}
 
-	dbUrl := viper.GetString("DB_URL")
+	database := viper.GetStringMapString("database")
+	dbUrl := database["url"]
 
 	db, err := gorm.Open(postgres.Open(dbUrl), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
@@ -84,13 +85,17 @@ func Load() error {
 		Secure:  true,
 	}
 
+	app := viper.GetStringMapString("app")
+	port := app["port"]
+	key := app["key"]
+
 	result := &Config{
 		dbUrl:     dbUrl,
-		port:      viper.GetString("PORT"),
+		port:      port,
 		db:        db,
 		pusher:    pusherClient,
 		rabbitMQ:  connectRabbitMq(),
-		secretKey: viper.GetString("APP_KEY"),
+		secretKey: key,
 		rds: redis.NewClient(&redis.Options{
 			Addr:     "redis-17404.c299.asia-northeast1-1.gce.cloud.redislabs.com:17404",
 			Password: "oVzG4E5NyOWCLaYU1II0021uR6rwj2yp",
@@ -104,7 +109,8 @@ func Load() error {
 }
 
 func connectRabbitMq() *amqp091.Connection {
-	conn, err := amqp091.Dial(viper.GetString("RABBITMQ_URL"))
+	rabbit := viper.GetStringMapString("rabbitmq")
+	conn, err := amqp091.Dial(rabbit["url"])
 	if err != nil {
 		log.Fatalln("connect failed to rabbit")
 	}

@@ -3,3 +3,4 @@
 *.mock.go
 #main
 main.exe
+config.yml

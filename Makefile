@@ -15,3 +15,6 @@ migrate-refresh:
 
 build:
 	@go build src/server/main.go
+
+gen-error:
+	@go run src/server/main.go gen-error ${parent} ${child} "${message}" ${statusCode}
