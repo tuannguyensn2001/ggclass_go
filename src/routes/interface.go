@@ -40,6 +40,7 @@ type MemberHttpTransport interface {
 	JoinClass(ctx *gin.Context)
 	AcceptInvite(ctx *gin.Context)
 	GetStudentsPendingByClass(ctx *gin.Context)
+	AcceptAll(ctx *gin.Context)
 }
 
 type AssignmentHttpTransport interface {

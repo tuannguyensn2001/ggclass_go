@@ -41,3 +41,7 @@ func (r *repository) GetStudentsPendingByClass(ctx context.Context, classId int)
 	}
 	return result, nil
 }
+
+func (r *repository) UpdateActiveByClass(ctx context.Context, classId int) error {
+	return r.db.Model(&models.UserClass{}).Where("class_id = ?", classId).Where("role = ?", enums.STUDENT).Where("status = ?", enums.PENDING).Update("status", enums.ACTIVE).Error
+}

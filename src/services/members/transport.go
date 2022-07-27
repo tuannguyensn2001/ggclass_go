@@ -14,6 +14,7 @@ type IService interface {
 	JoinClass(ctx context.Context, input JoinClassInput) error
 	AcceptInvite(ctx context.Context, input AcceptInviteInput, userId int) error
 	GetStudentsPendingByClass(ctx context.Context, classId int) ([]models.User, error)
+	AcceptAll(ctx context.Context, classId int) error
 }
 
 type httpTransport struct {
@@ -86,4 +87,20 @@ func (t *httpTransport) GetStudentsPendingByClass(ctx *gin.Context) {
 		"data":    result,
 	})
 
+}
+
+func (t *httpTransport) AcceptAll(ctx *gin.Context) {
+	classIdStr := ctx.Param("id")
+	classId, err := strconv.Atoi(classIdStr)
+	if err != nil {
+		panic(app.BadRequestHttpError("data not valid", err))
+	}
+	err = t.service.AcceptAll(ctx.Request.Context(), classId)
+	if err != nil {
+		panic(err)
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "done",
+	})
 }
