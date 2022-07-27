@@ -50,7 +50,7 @@ func MatchRoutes(r *gin.Engine) {
 		v1.POST("/members", middlewares.Auth, memberTransport.JoinClass)
 		v1.PUT("/members", middlewares.Auth, memberTransport.AcceptInvite)
 		v1.GET("/members/class/:id/pending", memberTransport.GetStudentsPendingByClass)
-		v1.POST("/members/class/:id/accept", middlewares.Auth, memberTransport.AcceptInvite)
+		v1.POST("/members/class/:id/accept", middlewares.Auth, memberTransport.AcceptAll)
 
 		v1.POST("/assignments/start", middlewares.Auth, assignmentTransport.Start)
 	}
