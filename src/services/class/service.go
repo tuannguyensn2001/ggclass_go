@@ -385,3 +385,23 @@ func (s *service) GetActiveClassByUser(ctx context.Context, userId int) ([]model
 
 	return s.repository.GetClassByIds(ctx, ids)
 }
+
+func (s *service) GetRoles(ctx context.Context, userId int) (*GetRoleOutput, error) {
+	list, err := s.repository.GetClassActiveByUser(ctx, userId)
+	if err != nil {
+		return nil, err
+	}
+
+	var admin []int
+	var student []int
+
+	for _, item := range list {
+		if item.Role == enums.ADMIN {
+			admin = append(admin, item.ClassId)
+		} else if item.Role == enums.STUDENT {
+			student = append(student, item.ClassId)
+		}
+	}
+
+	return &GetRoleOutput{Admin: admin, Student: student}, nil
+}

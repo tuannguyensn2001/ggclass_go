@@ -19,8 +19,3 @@ type LoginOutput struct {
 	AccessToken string       `json:"accessToken"`
 	User        *models.User `json:"user"`
 }
-
-type GetMeOutput struct {
-	//*models.User
-	//Classes []class.GetMyClassOutput `json:"classes"`
-}

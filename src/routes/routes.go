@@ -37,6 +37,7 @@ func MatchRoutes(r *gin.Engine) {
 		v1.GET("/classes", middlewares.Auth, classTransport.GetMyClass)
 
 		v1.GET("/classes/:id/posts", classTransport.GetPosts)
+		v1.GET("/classes/roles", middlewares.Auth, classTransport.GetRoles)
 		v1.GET("/classes/:id", classTransport.Show)
 
 		v1.POST("/posts", middlewares.Auth, postTransport.Create)

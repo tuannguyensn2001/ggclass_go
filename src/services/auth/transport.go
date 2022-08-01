@@ -2,15 +2,18 @@ package auth
 
 import (
 	"context"
+	"errors"
 	"ggclass_go/src/app"
 	"ggclass_go/src/models"
 	"github.com/gin-gonic/gin"
+	"go.opencensus.io/trace"
 	"net/http"
 )
 
 type IService interface {
 	Register(ctx context.Context, input RegisterInput) (*models.User, error)
 	Login(ctx context.Context, input LoginInput) (*LoginOutput, error)
+	GetUserById(ctx context.Context, id int) (*models.User, error)
 }
 
 type httpTransport struct {
@@ -65,22 +68,22 @@ func (t *httpTransport) Login(ctx *gin.Context) {
 
 func (t *httpTransport) GetMe(ctx *gin.Context) {
 
-	//userId, ok := ctx.Get("userId")
-	//if !ok {
-	//	panic(app.ForbiddenHttpError("forbidden", errors.New("forbidden")))
-	//}
-	//
-	//_, span := trace.StartSpan(ctx.Request.Context(), "start get me")
-	//defer span.End()
-	//
-	//user, err := t.service.GetUserById(ctx.Request.Context(), userId.(int))
-	//if err != nil {
-	//	panic(err)
-	//}
-	//
-	//ctx.JSON(http.StatusOK, gin.H{
-	//	"message": "done",
-	//	"data":    user,
-	//})
+	userId, ok := ctx.Get("userId")
+	if !ok {
+		panic(app.ForbiddenHttpError("forbidden", errors.New("forbidden")))
+	}
+
+	_, span := trace.StartSpan(ctx.Request.Context(), "start get me")
+	defer span.End()
+
+	user, err := t.service.GetUserById(ctx.Request.Context(), userId.(int))
+	if err != nil {
+		panic(err)
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "done",
+		"data":    user,
+	})
 
 }
