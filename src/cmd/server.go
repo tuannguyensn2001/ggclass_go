@@ -17,6 +17,13 @@ func server() *cobra.Command {
 	return &cobra.Command{
 		Use: "server",
 		Run: func(cmd *cobra.Command, args []string) {
+
+			isProduction := config.Cfg.IsProduction
+
+			if isProduction {
+				gin.SetMode(gin.ReleaseMode)
+			}
+
 			r := gin.Default()
 
 			r.Use(middlewares.Cors)
