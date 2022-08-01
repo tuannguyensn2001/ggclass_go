@@ -8,6 +8,7 @@ import (
 func BuildService() *service {
 	userService := user.BuildService()
 	repository := NewRepository(config.Cfg.GetDB())
-	service := NewService(repository, userService, config.Cfg.GetRedis())
+	service := NewService(repository, config.Cfg.GetRedis())
+	service.SetUserService(userService)
 	return service
 }

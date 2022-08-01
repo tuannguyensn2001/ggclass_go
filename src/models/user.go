@@ -14,4 +14,5 @@ type User struct {
 	UpdatedAt *time.Time      `gorm:"column:updated_at" json:"updatedAt"`
 	DeletedAt *gorm.DeletedAt `json:"deletedAt"`
 	Profile   Profile         `json:"profile"`
+	Classes   []Class         `json:"classes" gorm:"many2many:user_class"`
 }

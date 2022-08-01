@@ -34,3 +34,8 @@ type GetMyClassOutput struct {
 	models.Class
 	StatusClass enums.Status `json:"statusClass"`
 }
+
+type GetRoleOutput struct {
+	Admin   []int `json:"admin"`
+	Student []int `json:"student"`
+}

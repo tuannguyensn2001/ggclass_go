@@ -1,0 +1,1 @@
+alter table exercises add can_late int, add mode_submit int

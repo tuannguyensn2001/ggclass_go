@@ -4,7 +4,7 @@ import (
 	"context"
 	"ggclass_go/src/app"
 	"ggclass_go/src/models"
-	"ggclass_go/src/services/auth"
+	"ggclass_go/src/util"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -33,7 +33,7 @@ func (t *httpTransport) JoinClass(ctx *gin.Context) {
 		panic(app.BadRequestHttpError("data not valid", err))
 	}
 
-	userId, err := auth.GetUserIdFromContextWithError(ctx)
+	userId, err := util.GetUserIdFromContextWithError(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -57,7 +57,7 @@ func (t *httpTransport) AcceptInvite(ctx *gin.Context) {
 		panic(app.BadRequestHttpError("data not valid", err))
 	}
 
-	userId, err := auth.GetUserIdFromContextWithError(ctx)
+	userId, err := util.GetUserIdFromContextWithError(ctx)
 	if err != nil {
 		panic(err)
 	}

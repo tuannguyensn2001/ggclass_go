@@ -1,6 +1,8 @@
 package auth
 
-import "ggclass_go/src/models"
+import (
+	"ggclass_go/src/models"
+)
 
 type RegisterInput struct {
 	Username string `form:"username" binding:"required" validate:"required"`

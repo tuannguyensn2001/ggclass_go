@@ -9,8 +9,10 @@ import (
 	"ggclass_go/src/packages/hash"
 	"ggclass_go/src/packages/jwt"
 	"ggclass_go/src/packages/validate"
+	"ggclass_go/src/services/class"
 	"ggclass_go/src/services/profile"
 	"github.com/go-playground/validator/v10"
+	"gorm.io/gorm"
 )
 
 type IRepository interface {
@@ -23,11 +25,16 @@ type service struct {
 	repository     IRepository
 	secretKey      string
 	profileService IProfileService
+	classService   IClassService
 }
 
 type IProfileService interface {
 	GetByUserId(ctx context.Context, userId int) (*models.Profile, error)
 	Create(ctx context.Context, input profile.CreateProfileInput) (*models.Profile, error)
+}
+
+type IClassService interface {
+	GetMyClass(ctx context.Context, userId int) ([]class.GetMyClassOutput, error)
 }
 
 func NewService(repository IRepository, secretKey string) *service {
@@ -37,6 +44,10 @@ func NewService(repository IRepository, secretKey string) *service {
 func (s *service) SetProfileService(profileService IProfileService) {
 	s.profileService = profileService
 }
+
+//func (s *service) SetClassService(classService IClassService) {
+//	s.classService = classService
+//}
 
 func (s *service) Register(ctx context.Context, input RegisterInput) (*models.User, error) {
 
@@ -126,5 +137,26 @@ func (s *service) Login(ctx context.Context, input LoginInput) (*LoginOutput, er
 }
 
 func (s *service) GetUserById(ctx context.Context, id int) (*models.User, error) {
-	return s.repository.FindById(ctx, id)
+
+	user, err := s.repository.FindById(ctx, id)
+	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, app.ParseError("general.notFound")
+	}
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+	//classes, err := s.classService.GetMyClass(ctx, user.Id)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//
+	////user.Classes = classes
+	//output := GetMeOutput{
+	//	user,
+	//	classes,
+	//}
+	//
+	//return &output, nil
+
 }

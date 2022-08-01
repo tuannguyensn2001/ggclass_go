@@ -48,12 +48,16 @@ type service struct {
 	rds         *redis.Client
 }
 
-func NewService(repository IRepository, userService IUserService, rds *redis.Client) *service {
-	return &service{repository: repository, userService: userService, rds: rds}
+func NewService(repository IRepository, rds *redis.Client) *service {
+	return &service{repository: repository, rds: rds}
 }
 
 func (s *service) SetPostService(postService IPostService) {
 	s.postService = postService
+}
+
+func (s *service) SetUserService(userService IUserService) {
+	s.userService = userService
 }
 
 func (s *service) GetCodes(ctx context.Context) ([]string, error) {
@@ -353,4 +357,51 @@ func (s *service) GetByCode(ctx context.Context, code string) (*models.Class, er
 	}
 
 	return class, nil
+}
+
+func (s *service) GetById(ctx context.Context, id int) (*models.Class, error) {
+	class, err := s.repository.FindById(ctx, id)
+
+	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, app.ParseError("general.notFound")
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	return class, nil
+}
+func (s *service) GetActiveClassByUser(ctx context.Context, userId int) ([]models.Class, error) {
+	list, err := s.repository.GetClassActiveByUser(ctx, userId)
+	if err != nil {
+		return nil, err
+	}
+
+	ids := make([]int, 0)
+
+	for _, item := range list {
+		ids = append(ids, item.ClassId)
+	}
+
+	return s.repository.GetClassByIds(ctx, ids)
+}
+
+func (s *service) GetRoles(ctx context.Context, userId int) (*GetRoleOutput, error) {
+	list, err := s.repository.GetClassActiveByUser(ctx, userId)
+	if err != nil {
+		return nil, err
+	}
+
+	var admin []int
+	var student []int
+
+	for _, item := range list {
+		if item.Role == enums.ADMIN {
+			admin = append(admin, item.ClassId)
+		} else if item.Role == enums.STUDENT {
+			student = append(student, item.ClassId)
+		}
+	}
+
+	return &GetRoleOutput{Admin: admin, Student: student}, nil
 }

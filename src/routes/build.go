@@ -18,6 +18,7 @@ import (
 func buildAuthTransport() AuthHttpTransport {
 	service := auth.BuildService()
 	service.SetProfileService(profile.BuildService())
+	//service.SetClassService(class.BuildService())
 	transport := auth.NewHttpTransport(service)
 
 	return transport

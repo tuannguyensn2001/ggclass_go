@@ -16,6 +16,8 @@ type ClassHttpTransport interface {
 	AcceptInvite(ctx *gin.Context)
 	GetMyClass(ctx *gin.Context)
 	GetPosts(ctx *gin.Context)
+	Show(ctx *gin.Context)
+	GetRoles(ctx *gin.Context)
 }
 
 type PostHttpTransport interface {

@@ -6,7 +6,7 @@ import (
 	"errors"
 	"ggclass_go/src/app"
 	"ggclass_go/src/models"
-	"ggclass_go/src/services/auth"
+	"ggclass_go/src/util"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -20,6 +20,8 @@ type IService interface {
 	AcceptInvite(ctx context.Context, userId int, classId int) error
 	GetMyClass(ctx context.Context, userId int) ([]GetMyClassOutput, error)
 	GetPosts(ctx context.Context, classId int) ([]models.Post, error)
+	GetById(ctx context.Context, id int) (*models.Class, error)
+	GetRoles(ctx context.Context, classId int) (*GetRoleOutput, error)
 }
 
 type httpTransport struct {
@@ -36,7 +38,7 @@ func (t *httpTransport) Create(ctx *gin.Context) {
 		panic(app.BadRequestHttpError("data not valid", err))
 	}
 
-	userId, err := auth.GetUserIdFromContext(ctx)
+	userId, err := util.GetUserIdFromContext(ctx)
 
 	if err != nil {
 		panic(err)
@@ -79,7 +81,7 @@ func (t *httpTransport) DeleteMember(ctx *gin.Context) {
 		panic(app.BadRequestHttpError("data not valid", err))
 	}
 
-	userId, _ := auth.GetUserIdFromContext(ctx)
+	userId, _ := util.GetUserIdFromContext(ctx)
 
 	err := t.service.DeleteMember(ctx.Request.Context(), input, userId)
 
@@ -122,7 +124,7 @@ func (t *httpTransport) AcceptInvite(ctx *gin.Context) {
 		panic(err)
 	}
 
-	userId, err := auth.GetUserIdFromContext(ctx)
+	userId, err := util.GetUserIdFromContext(ctx)
 
 	if err != nil {
 		panic(app.ForbiddenHttpError("forbidden", errors.New("forbidden")))
@@ -140,7 +142,7 @@ func (t *httpTransport) AcceptInvite(ctx *gin.Context) {
 }
 
 func (t *httpTransport) GetMyClass(ctx *gin.Context) {
-	userId, err := auth.GetUserIdFromContext(ctx)
+	userId, err := util.GetUserIdFromContext(ctx)
 
 	if err != nil {
 		panic(app.ForbiddenHttpError("forbidden", errors.New("forbidden")))
@@ -177,4 +179,38 @@ func (t *httpTransport) GetPosts(ctx *gin.Context) {
 		"data":    result,
 	})
 
+}
+
+func (t *httpTransport) Show(ctx *gin.Context) {
+	id := ctx.Param("id")
+	classId, err := strconv.Atoi(id)
+	if err != nil {
+		panic(app.BadRequestHttpError("data not valid", err))
+	}
+	result, err := t.service.GetById(ctx.Request.Context(), classId)
+	if err != nil {
+		panic(err)
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "done",
+		"data":    result,
+	})
+}
+
+func (t *httpTransport) GetRoles(ctx *gin.Context) {
+	userId, err := util.GetUserIdFromContext(ctx)
+	if err != nil {
+		panic(err)
+	}
+
+	result, err := t.service.GetRoles(ctx.Request.Context(), userId)
+	if err != nil {
+		panic(err)
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "done",
+		"data":    result,
+	})
 }
