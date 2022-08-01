@@ -1,6 +1,9 @@
 package auth
 
-import "ggclass_go/src/models"
+import (
+	"ggclass_go/src/models"
+	"ggclass_go/src/services/class"
+)
 
 type RegisterInput struct {
 	Username string `form:"username" binding:"required" validate:"required"`
@@ -16,4 +19,9 @@ type LoginInput struct {
 type LoginOutput struct {
 	AccessToken string       `json:"accessToken"`
 	User        *models.User `json:"user"`
+}
+
+type GetMeOutput struct {
+	*models.User
+	Classes []class.GetMyClassOutput `json:"classes"`
 }

@@ -20,6 +20,7 @@ type IService interface {
 	AcceptInvite(ctx context.Context, userId int, classId int) error
 	GetMyClass(ctx context.Context, userId int) ([]GetMyClassOutput, error)
 	GetPosts(ctx context.Context, classId int) ([]models.Post, error)
+	GetById(ctx context.Context, id int) (*models.Class, error)
 }
 
 type httpTransport struct {
@@ -177,4 +178,21 @@ func (t *httpTransport) GetPosts(ctx *gin.Context) {
 		"data":    result,
 	})
 
+}
+
+func (t *httpTransport) Show(ctx *gin.Context) {
+	id := ctx.Param("id")
+	classId, err := strconv.Atoi(id)
+	if err != nil {
+		panic(app.BadRequestHttpError("data not valid", err))
+	}
+	result, err := t.service.GetById(ctx.Request.Context(), classId)
+	if err != nil {
+		panic(err)
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "done",
+		"data":    result,
+	})
 }
