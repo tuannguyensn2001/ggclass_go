@@ -2,7 +2,6 @@ package auth
 
 import (
 	"ggclass_go/src/models"
-	"ggclass_go/src/services/class"
 )
 
 type RegisterInput struct {
@@ -22,6 +21,6 @@ type LoginOutput struct {
 }
 
 type GetMeOutput struct {
-	*models.User
-	Classes []class.GetMyClassOutput `json:"classes"`
+	//*models.User
+	//Classes []class.GetMyClassOutput `json:"classes"`
 }

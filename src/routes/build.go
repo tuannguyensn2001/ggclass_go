@@ -2,6 +2,7 @@ package routes
 
 import (
 	"ggclass_go/src/services/assignment"
+	"ggclass_go/src/services/auth"
 	"ggclass_go/src/services/class"
 	"ggclass_go/src/services/comment"
 	"ggclass_go/src/services/exercise"
@@ -10,17 +11,18 @@ import (
 	"ggclass_go/src/services/folder"
 	"ggclass_go/src/services/members"
 	"ggclass_go/src/services/post"
+	"ggclass_go/src/services/profile"
 	"ggclass_go/src/services/user"
 )
 
-//func buildAuthTransport() AuthHttpTransport {
-//	service := auth.BuildService()
-//	service.SetProfileService(profile.BuildService())
-//	//service.SetClassService(class.BuildService())
-//	transport := auth.NewHttpTransport(service)
-//
-//	return transport
-//}
+func buildAuthTransport() AuthHttpTransport {
+	service := auth.BuildService()
+	service.SetProfileService(profile.BuildService())
+	//service.SetClassService(class.BuildService())
+	transport := auth.NewHttpTransport(service)
+
+	return transport
+}
 
 func buildClassTransport() ClassHttpTransport {
 
