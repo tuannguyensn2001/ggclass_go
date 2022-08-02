@@ -1,0 +1,1 @@
+drop table if exists notification_from_teacher_to_class;
