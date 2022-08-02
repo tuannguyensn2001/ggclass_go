@@ -15,6 +15,7 @@ type IRepository interface {
 	Update(ctx context.Context, userClass *models.UserClass) error
 	GetStudentsPendingByClass(ctx context.Context, classId int) ([]models.UserClass, error)
 	UpdateActiveByClass(ctx context.Context, classId int) error
+	GetStudentsActiveByClass(ctx context.Context, classId int) ([]models.UserClass, error)
 }
 
 type service struct {
@@ -129,4 +130,20 @@ func (s *service) GetStudentsPendingByClass(ctx context.Context, classId int) ([
 
 func (s *service) AcceptAll(ctx context.Context, classId int) error {
 	return s.repository.UpdateActiveByClass(ctx, classId)
+}
+
+func (s *service) GetIdMembers(ctx context.Context, classId int) ([]int, error) {
+	list, err := s.repository.GetStudentsActiveByClass(ctx, classId)
+	if err != nil {
+		return nil, err
+	}
+
+	var ids []int
+
+	for _, item := range list {
+		ids = append(ids, item.UserId)
+	}
+
+	return ids, nil
+
 }

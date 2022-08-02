@@ -48,3 +48,7 @@ type MemberHttpTransport interface {
 type AssignmentHttpTransport interface {
 	Start(ctx *gin.Context)
 }
+
+type NotificationHttpTransport interface {
+	CreateNotificationFromTeacherToClass(ctx *gin.Context)
+}

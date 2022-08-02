@@ -16,6 +16,7 @@ func MatchRoutes(r *gin.Engine) {
 	folderTransport := buildFolderTransport()
 	memberTransport := buildMemberTransport()
 	assignmentTransport := buildAssignmentTransport()
+	notificationTransport := buildNotificationTransport()
 
 	r.GET("/", func(context *gin.Context) {
 		context.JSON(http.StatusOK, gin.H{
@@ -56,5 +57,7 @@ func MatchRoutes(r *gin.Engine) {
 		v1.POST("/members/class/:id/accept", middlewares.Auth, memberTransport.AcceptAll)
 
 		v1.POST("/assignments/start", middlewares.Auth, assignmentTransport.Start)
+
+		v1.POST("/notifications/from-teacher-to-class", middlewares.Auth, notificationTransport.CreateNotificationFromTeacherToClass)
 	}
 }

@@ -45,3 +45,12 @@ func (r *repository) GetStudentsPendingByClass(ctx context.Context, classId int)
 func (r *repository) UpdateActiveByClass(ctx context.Context, classId int) error {
 	return r.db.Model(&models.UserClass{}).Where("class_id = ?", classId).Where("role = ?", enums.STUDENT).Where("status = ?", enums.PENDING).Update("status", enums.ACTIVE).Error
 }
+
+func (r *repository) GetStudentsActiveByClass(ctx context.Context, classId int) ([]models.UserClass, error) {
+	var result []models.UserClass
+	err := r.db.Where("class_id = ?", classId).Where("status = ?", enums.ACTIVE).Find(&result).Error
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}

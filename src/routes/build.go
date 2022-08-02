@@ -10,6 +10,7 @@ import (
 	"ggclass_go/src/services/exercise_multiple_choice"
 	"ggclass_go/src/services/folder"
 	"ggclass_go/src/services/members"
+	"ggclass_go/src/services/notification"
 	"ggclass_go/src/services/post"
 	"ggclass_go/src/services/profile"
 	"ggclass_go/src/services/user"
@@ -83,4 +84,9 @@ func buildAssignmentTransport() AssignmentHttpTransport {
 	service.SetExerciseCloneService(exerciseCloneService)
 
 	return assignment.NewHttpTransport(service)
+}
+
+func buildNotificationTransport() NotificationHttpTransport {
+	service := notification.BuildService()
+	return notification.NewHttpTransport(service)
 }
