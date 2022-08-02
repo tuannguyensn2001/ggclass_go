@@ -13,13 +13,14 @@ import (
 )
 
 type Config struct {
-	db        *gorm.DB
-	port      string
-	dbUrl     string
-	secretKey string
-	pusher    pusher.Client
-	rabbitMQ  *amqp091.Connection
-	rds       *redis.Client
+	db           *gorm.DB
+	port         string
+	dbUrl        string
+	secretKey    string
+	pusher       pusher.Client
+	rabbitMQ     *amqp091.Connection
+	rds          *redis.Client
+	IsProduction bool
 }
 
 var Cfg Config
@@ -88,14 +89,16 @@ func Load() error {
 	app := viper.GetStringMapString("app")
 	port := app["port"]
 	key := app["key"]
+	isProduction := app["env"] == "production"
 
 	result := &Config{
-		dbUrl:     dbUrl,
-		port:      port,
-		db:        db,
-		pusher:    pusherClient,
-		rabbitMQ:  connectRabbitMq(),
-		secretKey: key,
+		dbUrl:        dbUrl,
+		port:         port,
+		db:           db,
+		pusher:       pusherClient,
+		rabbitMQ:     connectRabbitMq(),
+		secretKey:    key,
+		IsProduction: isProduction,
 		rds: redis.NewClient(&redis.Options{
 			Addr:     "redis-17404.c299.asia-northeast1-1.gce.cloud.redislabs.com:17404",
 			Password: "oVzG4E5NyOWCLaYU1II0021uR6rwj2yp",
