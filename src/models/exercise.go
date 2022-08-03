@@ -31,5 +31,5 @@ type Exercise struct {
 }
 
 func (e Exercise) TableName() string {
-	return "exercise"
+	return "exercises"
 }

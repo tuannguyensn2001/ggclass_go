@@ -27,6 +27,7 @@ type PostHttpTransport interface {
 
 type ExerciseHttpTransport interface {
 	CreateMultipleChoice(ctx *gin.Context)
+	EditMultipleChoice(ctx *gin.Context)
 }
 
 type CommentHttpTransport interface {

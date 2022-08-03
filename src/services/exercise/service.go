@@ -2,6 +2,7 @@ package exercise
 
 import (
 	"context"
+	"ggclass_go/src/base"
 	"ggclass_go/src/config"
 	"ggclass_go/src/enums"
 	"ggclass_go/src/models"
@@ -11,6 +12,7 @@ import (
 )
 
 type IRepository interface {
+	base.IRepositoryBase
 	Create(ctx context.Context, exercise *models.Exercise) error
 	CreateMultipleChoice(ctx context.Context, multipleChoice *models.ExerciseMultipleChoice) error
 	CreateMultipleChoiceAnswer(ctx context.Context, answers []models.ExerciseMultipleChoiceAnswer) error
@@ -18,6 +20,12 @@ type IRepository interface {
 	GetDB() *gorm.DB
 	SetDB(db *gorm.DB)
 	FindById(ctx context.Context, id int) (*models.Exercise, error)
+	FindMultipleChoiceById(ctx context.Context, id int) (*models.ExerciseMultipleChoice, error)
+	FindAnswersByMultipleChoiceId(ctx context.Context, id int) ([]models.ExerciseMultipleChoiceAnswer, error)
+	Save(ctx context.Context, exercise *models.Exercise) error
+	SaveMultipleChoice(ctx context.Context, multipleChoice *models.ExerciseMultipleChoice) error
+	DeleteAnswersByMultipleChoiceId(ctx context.Context, id int) error
+	FindByClassId(ctx context.Context, classId int) ([]models.Exercise, error)
 }
 
 type service struct {
@@ -57,6 +65,8 @@ func (s *service) CreateMultipleChoice(ctx context.Context, input CreateExercise
 		CreatedBy:           userId,
 		Type:                enums.MultipleChoice,
 		Version:             1,
+		CanLate:             1,
+		ModeSubmit:          enums.Capture,
 	}
 
 	if len(input.TimeStart) > 0 {
@@ -127,4 +137,83 @@ func (s *service) CreateMultipleChoice(ctx context.Context, input CreateExercise
 
 func (s *service) GetById(ctx context.Context, id int) (*models.Exercise, error) {
 	return s.repository.FindById(ctx, id)
+}
+
+func (s *service) EditMultipleChoice(ctx context.Context, id int, input editExerciseMultipleChoiceInput) error {
+	err := validate.Exec(input)
+	if err != nil {
+		return err
+	}
+
+	exercise, err := s.repository.FindById(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	exercise.Name = input.Name
+	exercise.Password = input.Password
+	exercise.TimeToDo = input.TimeToDo
+	exercise.IsTest = input.IsTest
+	exercise.PreventViewQuestion = input.PreventViewQuestion
+	exercise.RoleStudent = input.RoleStudent
+	exercise.NumberOfTimeToDo = input.NumberOfTimeToDo
+	exercise.Mode = input.Mode
+	exercise.Version++
+
+	multipleChoice, err := s.repository.FindMultipleChoiceById(ctx, exercise.TypeId)
+	if err != nil {
+		return err
+	}
+
+	multipleChoice.FileQuestionUrl = input.MultipleChoice.FileQuestionUrl
+	multipleChoice.NumberOfQuestions = input.MultipleChoice.NumberOfQuestions
+	multipleChoice.Mark = input.MultipleChoice.Mark
+
+	answers := make([]models.ExerciseMultipleChoiceAnswer, len(input.MultipleChoice.Answers))
+
+	for index, item := range input.MultipleChoice.Answers {
+		answers[index] = models.ExerciseMultipleChoiceAnswer{
+			ExerciseMultipleChoiceId: multipleChoice.Id,
+			Order:                    item.Order,
+			Type:                     enums.ExerciseMultipleChoiceAnswerPick,
+			Answer:                   item.Answer,
+			Mark:                     item.Mark,
+		}
+	}
+
+	s.repository.BeginTransaction()
+
+	err = s.repository.Save(ctx, exercise)
+	if err != nil {
+		s.repository.Rollback()
+		return err
+	}
+
+	err = s.repository.SaveMultipleChoice(ctx, multipleChoice)
+	if err != nil {
+		s.repository.Rollback()
+		return err
+	}
+
+	err = s.repository.DeleteAnswersByMultipleChoiceId(ctx, multipleChoice.Id)
+	if err != nil {
+		s.repository.Rollback()
+		return err
+	}
+
+	err = s.repository.CreateMultipleChoiceAnswer(ctx, answers)
+	if err != nil {
+		s.repository.Rollback()
+		return err
+	}
+
+	s.repository.Commit()
+
+	go s.exerciseCloneService.StartClone(ctx, exercise.Id)
+
+	return nil
+}
+
+func (s *service) GetByClassId(ctx context.Context, classId int) ([]models.Exercise, error) {
+	return s.repository.FindByClassId(ctx, classId)
 }

@@ -7,11 +7,12 @@ import (
 )
 
 type repository struct {
-	db *gorm.DB
+	db       *gorm.DB
+	originDB *gorm.DB
 }
 
 func NewRepository(db *gorm.DB) *repository {
-	return &repository{db: db}
+	return &repository{db: db, originDB: db}
 }
 
 func (r *repository) Create(ctx context.Context, exercise *models.Exercise) error {
@@ -52,4 +53,58 @@ func (r *repository) FindById(ctx context.Context, id int) (*models.Exercise, er
 		return nil, err
 	}
 	return &result, nil
+}
+
+func (r *repository) FindMultipleChoiceById(ctx context.Context, id int) (*models.ExerciseMultipleChoice, error) {
+	var result models.ExerciseMultipleChoice
+	if err := r.db.Where("id  = ?", id).First(&result).Error; err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func (r *repository) FindAnswersByMultipleChoiceId(ctx context.Context, id int) ([]models.ExerciseMultipleChoiceAnswer, error) {
+	var result []models.ExerciseMultipleChoiceAnswer
+	if err := r.db.Where("exercise_multiple_choice_id = ?", id).Find(&result).Error; err != nil {
+		return nil, err
+
+	}
+	return result, nil
+}
+
+func (r *repository) BeginTransaction() {
+	tx := r.db.Begin()
+	r.db = tx
+}
+
+func (r *repository) Commit() {
+	r.db.Commit()
+	r.db = r.originDB
+}
+
+func (r *repository) Rollback() {
+	r.db.Rollback()
+	r.db = r.originDB
+}
+
+func (r *repository) Save(ctx context.Context, exercise *models.Exercise) error {
+	return r.db.Save(exercise).Error
+}
+
+func (r *repository) SaveMultipleChoice(ctx context.Context, multipleChoice *models.ExerciseMultipleChoice) error {
+	return r.db.Save(multipleChoice).Error
+}
+
+func (r *repository) DeleteAnswersByMultipleChoiceId(ctx context.Context, id int) error {
+	return r.db.Where("exercise_multiple_choice_id = ?", id).Delete(&models.ExerciseMultipleChoiceAnswer{}).Error
+}
+
+func (r *repository) FindByClassId(ctx context.Context, classId int) ([]models.Exercise, error) {
+	var result []models.Exercise
+	err := r.db.Where("class_id = ?", classId).Find(&result).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }

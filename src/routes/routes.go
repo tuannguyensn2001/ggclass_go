@@ -45,6 +45,7 @@ func MatchRoutes(r *gin.Engine) {
 		v1.DELETE("/posts/:id", middlewares.Auth, postTransport.Delete)
 
 		v1.POST("/exercises/multiple-choice", middlewares.Auth, exerciseTransport.CreateMultipleChoice)
+		v1.PUT("/exercises/multiple-choice/:id", middlewares.Auth, exerciseTransport.EditMultipleChoice)
 
 		v1.POST("/comments", middlewares.Auth, commentTransport.Create)
 

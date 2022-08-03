@@ -1,0 +1,1 @@
+alter table exercises add version int, add type_id int;

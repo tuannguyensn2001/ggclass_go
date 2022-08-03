@@ -8,10 +8,13 @@ import (
 	"ggclass_go/src/util"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strconv"
 )
 
 type IService interface {
 	CreateMultipleChoice(ctx context.Context, input CreateExerciseMultipleChoiceInput, userId int) (*models.Exercise, error)
+	EditMultipleChoice(ctx context.Context, id int, input editExerciseMultipleChoiceInput) error
+	GetByClassId(ctx context.Context, classId int) ([]models.Exercise, error)
 }
 
 type httpTransport struct {
@@ -43,4 +46,45 @@ func (t *httpTransport) CreateMultipleChoice(ctx *gin.Context) {
 		"data":    result,
 	})
 
+}
+
+func (t *httpTransport) EditMultipleChoice(ctx *gin.Context) {
+	var input editExerciseMultipleChoiceInput
+	if err := ctx.ShouldBind(&input); err != nil {
+		panic(app.BadRequestHttpError("data not valid", err))
+	}
+
+	id := ctx.Param("id")
+	exerciseId, err := strconv.Atoi(id)
+	if err != nil {
+		panic(app.BadRequestHttpError("data not valid", err))
+	}
+
+	err = t.service.EditMultipleChoice(ctx, exerciseId, input)
+	if err != nil {
+		panic(err)
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "done",
+	})
+
+}
+
+func (t *httpTransport) GetByClassId(ctx *gin.Context) {
+	classIdStr := ctx.Query("classId")
+	if len(classIdStr) > 0 {
+		classId, err := strconv.Atoi(classIdStr)
+		if err != nil {
+			panic(app.BadRequestHttpError("data not valid", err))
+		}
+		result, err := t.service.GetByClassId(ctx, classId)
+		if err != nil {
+			panic(err)
+		}
+		ctx.JSON(http.StatusOK, gin.H{
+			"message": "done",
+			"data":    result,
+		})
+	}
 }
