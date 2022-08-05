@@ -3,6 +3,7 @@ package exercise_clone
 import (
 	"context"
 	"errors"
+	"ggclass_go/src/app"
 	"ggclass_go/src/enums"
 	"ggclass_go/src/models"
 	"gorm.io/gorm"
@@ -17,6 +18,8 @@ type IRepository interface {
 	Rollback(ctx context.Context)
 	GetLatestByExerciseId(ctx context.Context, exerciseId int) (*models.ExerciseClone, error)
 	FindById(ctx context.Context, id int) (*models.ExerciseClone, error)
+	FindMultipleChoiceCloneById(ctx context.Context, id int) (*models.ExerciseMultipleChoiceClone, error)
+	FindAnswersByMultipleChoiceCloneId(ctx context.Context, id int) ([]models.ExerciseMultipleChoiceAnswerClone, error)
 }
 
 type service struct {
@@ -149,4 +152,39 @@ func (s *service) GetLatestClone(ctx context.Context, exerciseId int) (*models.E
 
 	return clone, nil
 
+}
+
+func (s *service) GetMultipleChoiceExerciseClone(ctx context.Context, id int) (*getMultipleChoiceOutput, error) {
+	exerciseClone, err := s.repository.FindById(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	if exerciseClone.Type != enums.MultipleChoice {
+		return nil, app.ConflictHttpError("type not valid", errors.New("type not valid"))
+	}
+
+	multipleChoiceClone, err := s.repository.FindMultipleChoiceCloneById(ctx, exerciseClone.TypeId)
+	if err != nil {
+		return nil, err
+	}
+
+	answers, err := s.repository.FindAnswersByMultipleChoiceCloneId(ctx, multipleChoiceClone.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	ids := make([]int, len(answers))
+
+	for index, item := range answers {
+		ids[index] = item.Id
+	}
+
+	output := getMultipleChoiceOutput{
+		Exercise:       exerciseClone,
+		MultipleChoice: multipleChoiceClone,
+		AnswerIds:      ids,
+	}
+
+	return &output, nil
 }

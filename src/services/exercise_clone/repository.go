@@ -2,6 +2,7 @@ package exercise_clone
 
 import (
 	"context"
+	"fmt"
 	"ggclass_go/src/models"
 	"gorm.io/gorm"
 )
@@ -56,4 +57,21 @@ func (r *repository) FindById(ctx context.Context, id int) (*models.ExerciseClon
 		return nil, err
 	}
 	return &result, nil
+}
+
+func (r *repository) FindMultipleChoiceCloneById(ctx context.Context, id int) (*models.ExerciseMultipleChoiceClone, error) {
+	var result models.ExerciseMultipleChoiceClone
+	if err := r.db.Where("id = ?", id).First(&result).Error; err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func (r *repository) FindAnswersByMultipleChoiceCloneId(ctx context.Context, id int) ([]models.ExerciseMultipleChoiceAnswerClone, error) {
+	var result []models.ExerciseMultipleChoiceAnswerClone
+	err := r.db.Where("exercise_multiple_choice_id = ?", id).Order(fmt.Sprintf("%q", "order")).Find(&result).Error
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }

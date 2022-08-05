@@ -7,12 +7,13 @@ import (
 	"ggclass_go/src/util"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strconv"
 )
 
 type IService interface {
 	Start(ctx context.Context, input StartAssignmentInput) (*models.Assigment, error)
 	CreateLog(ctx context.Context, input createLogInput) error
-	GetLogs(ctx context.Context) ([]models.LogAssignment, error)
+	GetLogs(ctx context.Context, assignmentId int) ([]models.LogAssignment, error)
 }
 
 type httpTransport struct {
@@ -65,7 +66,12 @@ func (t *httpTransport) CreateLog(ctx *gin.Context) {
 }
 
 func (t *httpTransport) GetLogs(ctx *gin.Context) {
-	result, err := t.service.GetLogs(ctx.Request.Context())
+	id := ctx.Param("id")
+	assignmentId, err := strconv.Atoi(id)
+	if err != nil {
+		panic(app.BadRequestHttpError("data not valid", err))
+	}
+	result, err := t.service.GetLogs(ctx.Request.Context(), assignmentId)
 	if err != nil {
 		panic(err)
 	}

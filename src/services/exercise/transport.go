@@ -15,6 +15,7 @@ type IService interface {
 	CreateMultipleChoice(ctx context.Context, input CreateExerciseMultipleChoiceInput, userId int) (*models.Exercise, error)
 	EditMultipleChoice(ctx context.Context, id int, input editExerciseMultipleChoiceInput) error
 	GetByClassId(ctx context.Context, classId int) ([]models.Exercise, error)
+	GetMultipleChoiceExercise(ctx context.Context, id int) (*getMultipleChoiceOutput, error)
 }
 
 type httpTransport struct {
@@ -87,4 +88,23 @@ func (t *httpTransport) GetByClassId(ctx *gin.Context) {
 			"data":    result,
 		})
 	}
+}
+
+func (t *httpTransport) GetMultipleChoice(ctx *gin.Context) {
+	id := ctx.Param("id")
+	exerciseId, err := strconv.Atoi(id)
+	if err != nil {
+		panic(app.BadRequestHttpError("data not valid", err))
+	}
+
+	result, err := t.service.GetMultipleChoiceExercise(ctx.Request.Context(), exerciseId)
+	if err != nil {
+		panic(err)
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "done",
+		"data":    result,
+	})
+
 }

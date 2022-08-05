@@ -90,3 +90,8 @@ func buildNotificationTransport() NotificationHttpTransport {
 	service := notification.BuildService()
 	return notification.NewHttpTransport(service)
 }
+
+func buildExerciseCloneTransport() ExerciseCloneHttpTransport {
+	service := exercise_clone.BuildService()
+	return exercise_clone.NewHttpTransport(service)
+}

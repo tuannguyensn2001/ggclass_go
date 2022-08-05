@@ -2,6 +2,8 @@ package exercise
 
 import (
 	"context"
+	"errors"
+	"ggclass_go/src/app"
 	"ggclass_go/src/base"
 	"ggclass_go/src/config"
 	"ggclass_go/src/enums"
@@ -26,6 +28,7 @@ type IRepository interface {
 	SaveMultipleChoice(ctx context.Context, multipleChoice *models.ExerciseMultipleChoice) error
 	DeleteAnswersByMultipleChoiceId(ctx context.Context, id int) error
 	FindByClassId(ctx context.Context, classId int) ([]models.Exercise, error)
+	FindExerciseCloneByExerciseIdAndVersion(ctx context.Context, exerciseId int, version int) (*models.ExerciseClone, error)
 }
 
 type service struct {
@@ -215,5 +218,43 @@ func (s *service) EditMultipleChoice(ctx context.Context, id int, input editExer
 }
 
 func (s *service) GetByClassId(ctx context.Context, classId int) ([]models.Exercise, error) {
-	return s.repository.FindByClassId(ctx, classId)
+	list, err := s.repository.FindByClassId(ctx, classId)
+	if err != nil {
+		return nil, err
+	}
+
+	for index, item := range list {
+		clone, err := s.repository.FindExerciseCloneByExerciseIdAndVersion(ctx, item.Id, item.Version)
+		if err != nil {
+			return nil, err
+		}
+
+		list[index].ExerciseCloneId = clone.Id
+
+	}
+
+	return list, nil
+}
+
+func (s *service) GetMultipleChoiceExercise(ctx context.Context, id int) (*getMultipleChoiceOutput, error) {
+	exercise, err := s.repository.FindById(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	if exercise.Type != enums.MultipleChoice {
+		return nil, app.ConflictHttpError("type is not valid", errors.New("type is not valid"))
+	}
+
+	multipleChoice, err := s.repository.FindMultipleChoiceById(ctx, exercise.TypeId)
+	if err != nil {
+		return nil, err
+	}
+
+	output := getMultipleChoiceOutput{
+		Exercise:       exercise,
+		MultipleChoice: multipleChoice,
+	}
+
+	return &output, nil
 }

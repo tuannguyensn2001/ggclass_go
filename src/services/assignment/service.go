@@ -85,7 +85,7 @@ func (s *service) CreateLog(ctx context.Context, input createLogInput) error {
 	return nil
 }
 
-func (s *service) GetLogs(ctx context.Context) ([]models.LogAssignment, error) {
+func (s *service) GetLogs(ctx context.Context, assignmentId int) ([]models.LogAssignment, error) {
 	conn, err := grpc.Dial(config.Cfg.LogService, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, err
@@ -95,7 +95,7 @@ func (s *service) GetLogs(ctx context.Context) ([]models.LogAssignment, error) {
 
 	c := logsAssignmentpb.NewLogAssignmentServiceClient(conn)
 
-	r, err := c.GetLogAssignmentByAssignment(ctx, &logsAssignmentpb.GetLogAssignmentByAssignmentRequest{AssignmentId: 1})
+	r, err := c.GetLogAssignmentByAssignment(ctx, &logsAssignmentpb.GetLogAssignmentByAssignmentRequest{AssignmentId: int64(assignmentId)})
 	if err != nil {
 		return nil, err
 	}

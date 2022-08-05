@@ -1,1 +1,0 @@
-alter table exercises drop column version,drop column type_id;

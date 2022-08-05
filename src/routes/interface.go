@@ -28,6 +28,8 @@ type PostHttpTransport interface {
 type ExerciseHttpTransport interface {
 	CreateMultipleChoice(ctx *gin.Context)
 	EditMultipleChoice(ctx *gin.Context)
+	GetMultipleChoice(ctx *gin.Context)
+	GetByClassId(ctx *gin.Context)
 }
 
 type CommentHttpTransport interface {
@@ -54,4 +56,8 @@ type AssignmentHttpTransport interface {
 
 type NotificationHttpTransport interface {
 	CreateNotificationFromTeacherToClass(ctx *gin.Context)
+}
+
+type ExerciseCloneHttpTransport interface {
+	GetMultipleChoice(ctx *gin.Context)
 }

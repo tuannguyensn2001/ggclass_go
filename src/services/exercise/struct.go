@@ -1,6 +1,9 @@
 package exercise
 
-import "ggclass_go/src/enums"
+import (
+	"ggclass_go/src/enums"
+	"ggclass_go/src/models"
+)
 
 type CreateExerciseMultipleChoiceInput struct {
 	Name                string                    `form:"name" validate:"required"`
@@ -58,4 +61,14 @@ type editExerciseMultipleChoiceInput struct {
 	NumberOfTimeToDo    int                       `form:"numberOfTimeToDo"`
 	Mode                enums.ExerciseMode        `form:"mode" validate:"required,min=1,max=3"`
 	MultipleChoice      MultipleChoiceInput       `form:"multipleChoice"`
+}
+
+type getMultipleChoiceOutput struct {
+	Exercise       *models.Exercise               `json:"exercise"`
+	MultipleChoice *models.ExerciseMultipleChoice `json:"multipleChoice"`
+}
+
+type getMultipleChoiceAnswer struct {
+	Id    int `json:"id"`
+	Order int `json:"order"`
 }

@@ -1,6 +1,8 @@
 syntax="proto3";
 import "google/protobuf/timestamp.proto";
 
+package assignment;
+
 option go_package="./logsAssignmentpb";
 
 message LogAssignment {

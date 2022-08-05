@@ -108,3 +108,12 @@ func (r *repository) FindByClassId(ctx context.Context, classId int) ([]models.E
 
 	return result, nil
 }
+
+func (r *repository) FindExerciseCloneByExerciseIdAndVersion(ctx context.Context, exerciseId int, version int) (*models.ExerciseClone, error) {
+	var result models.ExerciseClone
+	err := r.db.Select("id").Where("exercise_id = ?", exerciseId).Where("version = ?", version).First(&result).Error
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+}

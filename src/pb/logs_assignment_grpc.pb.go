@@ -35,7 +35,7 @@ func NewLogAssignmentServiceClient(cc grpc.ClientConnInterface) LogAssignmentSer
 
 func (c *logAssignmentServiceClient) GetLogAssignmentByAssignment(ctx context.Context, in *GetLogAssignmentByAssignmentRequest, opts ...grpc.CallOption) (*GetLogAssignmentByAssignmentResponse, error) {
 	out := new(GetLogAssignmentByAssignmentResponse)
-	err := c.cc.Invoke(ctx, "/LogAssignmentService/GetLogAssignmentByAssignment", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/assignment.LogAssignmentService/GetLogAssignmentByAssignment", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +80,7 @@ func _LogAssignmentService_GetLogAssignmentByAssignment_Handler(srv interface{},
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/LogAssignmentService/GetLogAssignmentByAssignment",
+		FullMethod: "/assignment.LogAssignmentService/GetLogAssignmentByAssignment",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(LogAssignmentServiceServer).GetLogAssignmentByAssignment(ctx, req.(*GetLogAssignmentByAssignmentRequest))
@@ -92,7 +92,7 @@ func _LogAssignmentService_GetLogAssignmentByAssignment_Handler(srv interface{},
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var LogAssignmentService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "LogAssignmentService",
+	ServiceName: "assignment.LogAssignmentService",
 	HandlerType: (*LogAssignmentServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
