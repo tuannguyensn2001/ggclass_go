@@ -10,10 +10,14 @@ import (
 	"github.com/rabbitmq/amqp091-go"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"gorm.io/gorm"
 )
 
 type IRepository interface {
 	Create(ctx context.Context, assignment *models.Assigment) error
+	CreateMultipleChoiceAnswer(ctx context.Context, assignment *models.AssigmentMultipleChoice) error
+	FindByAssignmentIdAndExerciseMultipleChoiceAnswerCloneId(ctx context.Context, assignmentId int, cloneId int) (*models.AssigmentMultipleChoice, error)
+	SaveMultipleChoiceAnswer(ctx context.Context, assignment *models.AssigmentMultipleChoice) error
 }
 
 type service struct {
@@ -111,4 +115,36 @@ func (s *service) GetLogs(ctx context.Context, assignmentId int) ([]models.LogAs
 	}
 
 	return result, nil
+}
+
+func (s *service) UserCreateAnswerMultipleChoice(ctx context.Context, input userCreateAnswerInput) error {
+
+	check, err := s.repository.FindByAssignmentIdAndExerciseMultipleChoiceAnswerCloneId(ctx, input.AssignmentId, input.ExerciseMultipleChoiceAnswerCloneId)
+
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return err
+	}
+
+	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
+		assignmentMultipleChoice := models.AssigmentMultipleChoice{
+			AssignmentId:                        input.AssignmentId,
+			ExerciseMultipleChoiceAnswerCloneId: input.ExerciseMultipleChoiceAnswerCloneId,
+			Answer:                              input.Answer,
+		}
+
+		err = s.repository.CreateMultipleChoiceAnswer(ctx, &assignmentMultipleChoice)
+
+		return err
+	}
+
+	check.Answer = input.Answer
+
+	err = s.repository.SaveMultipleChoiceAnswer(ctx, check)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+
 }
