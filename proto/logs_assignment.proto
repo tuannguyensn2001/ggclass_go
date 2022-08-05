@@ -1,0 +1,24 @@
+syntax="proto3";
+import "google/protobuf/timestamp.proto";
+
+option go_package="./logsAssignmentpb";
+
+message LogAssignment {
+  string id = 6;
+  int64 assignmentId = 2;
+  string action = 3;
+  google.protobuf.Timestamp createdAt = 4;
+  google.protobuf.Timestamp updatedAt = 5;
+}
+
+message GetLogAssignmentByAssignmentRequest {
+  int64 assignmentId = 1;
+}
+
+message GetLogAssignmentByAssignmentResponse {
+  repeated LogAssignment data = 1;
+}
+
+service LogAssignmentService {
+  rpc GetLogAssignmentByAssignment(GetLogAssignmentByAssignmentRequest) returns(GetLogAssignmentByAssignmentResponse);
+}

@@ -2,7 +2,14 @@ package assignment
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
+	"ggclass_go/src/config"
 	"ggclass_go/src/models"
+	logsAssignmentpb "ggclass_go/src/pb"
+	"github.com/rabbitmq/amqp091-go"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type IRepository interface {
@@ -44,4 +51,64 @@ func (s *service) Start(ctx context.Context, input StartAssignmentInput) (*model
 	}
 
 	return &assignment, nil
+}
+
+func (s *service) CreateLog(ctx context.Context, input createLogInput) error {
+	rabbit := config.Cfg.GetRabbitMQ()
+	if rabbit == nil {
+		return errors.New("init rabbit err")
+	}
+
+	ch, err := rabbit.Channel()
+	if err != nil {
+		return err
+	}
+
+	err = ch.ExchangeDeclare("logs", "direct", true, false, false, false, nil)
+	if err != nil {
+		return err
+	}
+
+	body, err := json.Marshal(input)
+	if err != nil {
+		return err
+	}
+
+	err = ch.Publish("logs", "assignment", false, false, amqp091.Publishing{
+		ContentType: "text/plain",
+		Body:        body,
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *service) GetLogs(ctx context.Context) ([]models.LogAssignment, error) {
+	conn, err := grpc.Dial(config.Cfg.LogService, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		return nil, err
+	}
+
+	defer conn.Close()
+
+	c := logsAssignmentpb.NewLogAssignmentServiceClient(conn)
+
+	r, err := c.GetLogAssignmentByAssignment(ctx, &logsAssignmentpb.GetLogAssignmentByAssignmentRequest{AssignmentId: 1})
+	if err != nil {
+		return nil, err
+	}
+
+	var result []models.LogAssignment
+
+	for _, item := range r.Data {
+		result = append(result, models.LogAssignment{
+			AssignmentId: int(item.AssignmentId),
+			Action:       item.Action,
+			Id:           item.Id,
+		})
+	}
+
+	return result, nil
 }

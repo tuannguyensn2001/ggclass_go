@@ -21,6 +21,7 @@ type Config struct {
 	rabbitMQ     *amqp091.Connection
 	rds          *redis.Client
 	IsProduction bool
+	LogService   string
 }
 
 var Cfg Config
@@ -103,6 +104,7 @@ func Load() error {
 			Addr:     "redis-17404.c299.asia-northeast1-1.gce.cloud.redislabs.com:17404",
 			Password: "oVzG4E5NyOWCLaYU1II0021uR6rwj2yp",
 		}),
+		LogService: viper.GetString("logService"),
 	}
 
 	Cfg = *result

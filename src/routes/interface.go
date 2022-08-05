@@ -48,6 +48,8 @@ type MemberHttpTransport interface {
 
 type AssignmentHttpTransport interface {
 	Start(ctx *gin.Context)
+	CreateLog(ctx *gin.Context)
+	GetLogs(ctx *gin.Context)
 }
 
 type NotificationHttpTransport interface {
