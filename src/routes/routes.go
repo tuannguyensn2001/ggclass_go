@@ -65,6 +65,7 @@ func MatchRoutes(r *gin.Engine) {
 		v1.POST("/assignments/start", middlewares.Auth, assignmentTransport.Start)
 		v1.POST("/assignments/logs", assignmentTransport.CreateLog)
 		v1.GET("/assignments/:id/logs", assignmentTransport.GetLogs)
+		v1.POST("/assignments/submit/multiple-choice", assignmentTransport.SubmitMultipleChoiceExercise)
 
 		v1.POST("/notifications/from-teacher-to-class", middlewares.Auth, notificationTransport.CreateNotificationFromTeacherToClass)
 	}

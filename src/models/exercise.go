@@ -28,7 +28,7 @@ type Exercise struct {
 	Version             int                       `gorm:"column:version;" json:"version"`
 	CanLate             int                       `gorm:"column:can_late;" json:"canLate"`
 	ModeSubmit          enums.ModeSubmit          `gorm:"column:mode_submit;" json:"modeSubmit"`
-	ExerciseCloneId     int                       `json:"exerciseCloneId"`
+	ExerciseCloneId     int                       ` gorm:"-" json:"exerciseCloneId"`
 }
 
 func (e Exercise) TableName() string {

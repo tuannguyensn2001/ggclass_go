@@ -12,6 +12,7 @@ type Assigment struct {
 	TimeLate        int             `gorm:"column:time_late;" json:"timeLate"`
 	UserId          int             `gorm:"column:user_id;" json:"userId"`
 	Mark            float64         `gorm:"column:mark;" json:"mark"`
+	IsSubmit        int             `gorm:"column:is_submit;" json:"isSubmit"`
 	CreatedAt       *time.Time      `gorm:"column:created_at;" json:"createdAt"`
 	UpdatedAt       *time.Time      `gorm:"column:updated_at" json:"updatedAt"`
 	DeletedAt       *gorm.DeletedAt `json:"deletedAt"`

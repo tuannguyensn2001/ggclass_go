@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"ggclass_go/src/app"
 	"ggclass_go/src/config"
 	"ggclass_go/src/models"
 	logsAssignmentpb "ggclass_go/src/pb"
@@ -18,6 +19,9 @@ type IRepository interface {
 	CreateMultipleChoiceAnswer(ctx context.Context, assignment *models.AssigmentMultipleChoice) error
 	FindByAssignmentIdAndExerciseMultipleChoiceAnswerCloneId(ctx context.Context, assignmentId int, cloneId int) (*models.AssigmentMultipleChoice, error)
 	SaveMultipleChoiceAnswer(ctx context.Context, assignment *models.AssigmentMultipleChoice) error
+	FindById(ctx context.Context, id int) (*models.Assigment, error)
+	Save(ctx context.Context, assignment *models.Assigment) error
+	CreateListAssignmentMultipleChoice(ctx context.Context, list *[]models.AssigmentMultipleChoice) error
 }
 
 type service struct {
@@ -82,6 +86,7 @@ func (s *service) CreateLog(ctx context.Context, input createLogInput) error {
 		ContentType: "text/plain",
 		Body:        body,
 	})
+
 	if err != nil {
 		return err
 	}
@@ -141,6 +146,42 @@ func (s *service) UserCreateAnswerMultipleChoice(ctx context.Context, input user
 
 	err = s.repository.SaveMultipleChoiceAnswer(ctx, check)
 
+	if err != nil {
+		return err
+	}
+
+	return nil
+
+}
+
+func (s *service) SubmitMultipleChoiceExercise(ctx context.Context, input submitMultipleChoiceInput) error {
+	assignment, err := s.repository.FindById(ctx, input.AssignmentId)
+	if err != nil {
+		return err
+	}
+
+	if assignment.IsSubmit == 1 {
+		return app.ConflictHttpError("assignment submitted", errors.New("assignment submitted"))
+	}
+
+	assignment.IsSubmit = 1
+
+	answers := make([]models.AssigmentMultipleChoice, 0)
+
+	for _, item := range input.Answers {
+		item := models.AssigmentMultipleChoice{
+			AssignmentId:                        assignment.Id,
+			ExerciseMultipleChoiceAnswerCloneId: item.Id,
+			Answer:                              item.Answer,
+		}
+		answers = append(answers, item)
+	}
+
+	err = s.repository.Save(ctx, assignment)
+	if err != nil {
+		return err
+	}
+	err = s.repository.CreateListAssignmentMultipleChoice(ctx, &answers)
 	if err != nil {
 		return err
 	}

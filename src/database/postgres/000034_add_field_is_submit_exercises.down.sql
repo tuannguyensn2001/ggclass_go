@@ -1,0 +1,1 @@
+alter table assignments drop column is_submit;

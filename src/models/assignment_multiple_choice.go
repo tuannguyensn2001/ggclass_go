@@ -14,3 +14,7 @@ type AssigmentMultipleChoice struct {
 	UpdatedAt                           *time.Time      `gorm:"column:updated_at" json:"updatedAt"`
 	DeletedAt                           *gorm.DeletedAt `json:"deletedAt"`
 }
+
+func (AssigmentMultipleChoice) TableName() string {
+	return "assignment_multiple_choice"
+}

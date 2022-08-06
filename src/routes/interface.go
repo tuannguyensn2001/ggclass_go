@@ -52,6 +52,7 @@ type AssignmentHttpTransport interface {
 	Start(ctx *gin.Context)
 	CreateLog(ctx *gin.Context)
 	GetLogs(ctx *gin.Context)
+	SubmitMultipleChoiceExercise(ctx *gin.Context)
 }
 
 type NotificationHttpTransport interface {

@@ -14,6 +14,7 @@ type IService interface {
 	Start(ctx context.Context, input StartAssignmentInput) (*models.Assigment, error)
 	CreateLog(ctx context.Context, input createLogInput) error
 	GetLogs(ctx context.Context, assignmentId int) ([]models.LogAssignment, error)
+	SubmitMultipleChoiceExercise(ctx context.Context, input submitMultipleChoiceInput) error
 }
 
 type httpTransport struct {
@@ -79,4 +80,18 @@ func (t *httpTransport) GetLogs(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{
 		"data": result,
 	})
+}
+
+func (t *httpTransport) SubmitMultipleChoiceExercise(ctx *gin.Context) {
+	var input submitMultipleChoiceInput
+	if err := ctx.ShouldBind(&input); err != nil {
+		panic(app.BadRequestHttpError("data not valid", err))
+	}
+
+	err := t.service.SubmitMultipleChoiceExercise(ctx, input)
+	if err != nil {
+		panic(err)
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "done"})
 }

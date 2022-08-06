@@ -15,3 +15,11 @@ type userCreateAnswerInput struct {
 	ExerciseMultipleChoiceAnswerCloneId int    `form:"exerciseMultipleChoiceAnswerCloneId" binding:"required"`
 	Answer                              string `form:"answer" binding:"required"`
 }
+
+type submitMultipleChoiceInput struct {
+	AssignmentId int `form:"assignmentId" binding:"required"`
+	Answers      []struct {
+		Id     int    `form:"id" binding:"required"`
+		Answer string `form:"answer" binding:"required"`
+	} `form:"answers" binding:"required"`
+}

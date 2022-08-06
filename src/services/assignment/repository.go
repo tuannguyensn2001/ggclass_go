@@ -36,3 +36,19 @@ func (r *repository) FindByAssignmentIdAndExerciseMultipleChoiceAnswerCloneId(ct
 
 	return &result, nil
 }
+
+func (r *repository) FindById(ctx context.Context, id int) (*models.Assigment, error) {
+	var result models.Assigment
+	if err := r.db.Where("id = ?", id).First(&result).Error; err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func (r *repository) Save(ctx context.Context, assignment *models.Assigment) error {
+	return r.db.Save(assignment).Error
+}
+
+func (r *repository) CreateListAssignmentMultipleChoice(ctx context.Context, list *[]models.AssigmentMultipleChoice) error {
+	return r.db.Create(list).Error
+}

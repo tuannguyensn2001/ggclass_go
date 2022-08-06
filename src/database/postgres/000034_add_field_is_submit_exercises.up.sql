@@ -1,0 +1,1 @@
+alter table assignments add is_submit int;
