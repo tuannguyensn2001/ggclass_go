@@ -117,6 +117,7 @@ func connectRabbitMq() *amqp091.Connection {
 	rabbit := viper.GetStringMapString("rabbitmq")
 	conn, err := amqp091.Dial(rabbit["url"])
 	if err != nil {
+
 		log.Fatalln("connect failed to rabbit")
 	}
 	return conn

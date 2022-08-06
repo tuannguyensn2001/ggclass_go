@@ -72,3 +72,11 @@ type getMultipleChoiceAnswer struct {
 	Id    int `json:"id"`
 	Order int `json:"order"`
 }
+
+type submitMultipleChoiceInput struct {
+	AssigmentId int `form:"assignmentId" binding:"required"`
+	Answers     []struct {
+		Id     int    `form:"id" binding:"required"`
+		Answer string `form:"answer" binding:"required"`
+	} `form:"answers" binding:"required"`
+}

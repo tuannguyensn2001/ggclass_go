@@ -5,7 +5,8 @@ app:
 
 database:
   driver: postgres
-  url: postgresql://postgres:secret@localhost:5432/ggclass?sslmode=disable
+#  url: postgresql://postgres:secret@localhost:5432/ggclass?sslmode=disable
+  url: postgres://igyoqnde:0bNCMzvPJGHCHoDilRzW4zDogjJWzijc@arjuna.db.elephantsql.com/igyoqnde
 
 rabbitmq:
   url: amqps://xjhmwkzn:cNVpuB5RuzHoc9L0D_CHnDFCl4U0iFIB@armadillo.rmq.cloudamqp.com/xjhmwkzn
