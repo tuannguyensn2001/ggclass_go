@@ -82,6 +82,7 @@ func buildAssignmentTransport() AssignmentHttpTransport {
 	exerciseCloneService.SetExerciseService(exercise.BuildService())
 	exerciseCloneService.SetExerciseMultipleChoiceService(exercise_multiple_choice.BuildService())
 	service.SetExerciseCloneService(exerciseCloneService)
+	service.SetExerciseMultipleChoiceService(exercise_multiple_choice.BuildService())
 
 	return assignment.NewHttpTransport(service)
 }

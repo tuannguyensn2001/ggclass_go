@@ -5,16 +5,20 @@ import (
 	"encoding/json"
 	"errors"
 	"ggclass_go/src/app"
+	"ggclass_go/src/base"
 	"ggclass_go/src/config"
+	"ggclass_go/src/enums"
 	"ggclass_go/src/models"
 	logsAssignmentpb "ggclass_go/src/pb"
 	"github.com/rabbitmq/amqp091-go"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"gorm.io/gorm"
+	"time"
 )
 
 type IRepository interface {
+	base.IRepositoryBase
 	Create(ctx context.Context, assignment *models.Assigment) error
 	CreateMultipleChoiceAnswer(ctx context.Context, assignment *models.AssigmentMultipleChoice) error
 	FindByAssignmentIdAndExerciseMultipleChoiceAnswerCloneId(ctx context.Context, assignmentId int, cloneId int) (*models.AssigmentMultipleChoice, error)
@@ -22,15 +26,24 @@ type IRepository interface {
 	FindById(ctx context.Context, id int) (*models.Assigment, error)
 	Save(ctx context.Context, assignment *models.Assigment) error
 	CreateListAssignmentMultipleChoice(ctx context.Context, list *[]models.AssigmentMultipleChoice) error
+	FindMultipleChoiceAnswerByAssignmentId(ctx context.Context, id int) ([]models.AssigmentMultipleChoice, error)
 }
 
 type service struct {
-	repository    IRepository
-	exerciseClone IExerciseClone
+	repository                    IRepository
+	exerciseClone                 IExerciseClone
+	exerciseMultipleChoiceService IExerciseMultipleChoiceService
 }
 
 type IExerciseClone interface {
 	GetLatestClone(ctx context.Context, exerciseId int) (*models.ExerciseClone, error)
+	GetById(ctx context.Context, id int) (*models.ExerciseClone, error)
+	GetMultipleChoiceExerciseCloneById(ctx context.Context, id int) (*models.ExerciseMultipleChoiceClone, error)
+	GetAnswersByMultipleChoiceCloneId(ctx context.Context, id int) ([]models.ExerciseMultipleChoiceAnswerClone, error)
+}
+
+type IExerciseMultipleChoiceService interface {
+	GetMark(ctx context.Context, answers []models.ExerciseMultipleChoiceAnswerClone, assignmentAnswers []models.AssigmentMultipleChoice) float64
 }
 
 func NewService(repository IRepository) *service {
@@ -39,6 +52,10 @@ func NewService(repository IRepository) *service {
 
 func (s *service) SetExerciseCloneService(exerciseCloneService IExerciseClone) {
 	s.exerciseClone = exerciseCloneService
+}
+
+func (s *service) SetExerciseMultipleChoiceService(exerciseMultipleChoiceService IExerciseMultipleChoiceService) {
+	s.exerciseMultipleChoiceService = exerciseMultipleChoiceService
 }
 
 func (s *service) Start(ctx context.Context, input StartAssignmentInput) (*models.Assigment, error) {
@@ -169,23 +186,73 @@ func (s *service) SubmitMultipleChoiceExercise(ctx context.Context, input submit
 	answers := make([]models.AssigmentMultipleChoice, 0)
 
 	for _, item := range input.Answers {
+		now := time.Now()
 		item := models.AssigmentMultipleChoice{
 			AssignmentId:                        assignment.Id,
 			ExerciseMultipleChoiceAnswerCloneId: item.Id,
 			Answer:                              item.Answer,
+			CreatedAt:                           &now,
+			UpdatedAt:                           &now,
 		}
 		answers = append(answers, item)
 	}
 
+	s.repository.BeginTransaction()
+
 	err = s.repository.Save(ctx, assignment)
 	if err != nil {
+		s.repository.Rollback()
 		return err
 	}
 	err = s.repository.CreateListAssignmentMultipleChoice(ctx, &answers)
 	if err != nil {
+		s.repository.Rollback()
 		return err
 	}
 
+	mark, err := s.MarkAssignment(ctx, assignment)
+	if err != nil {
+		s.repository.Rollback()
+		return err
+	}
+	assignment.Mark = mark
+	err = s.repository.Save(ctx, assignment)
+	if err != nil {
+		s.repository.Rollback()
+		return err
+	}
+
+	s.repository.Commit()
+
 	return nil
+
+}
+
+func (s *service) MarkAssignment(ctx context.Context, assignment *models.Assigment) (float64, error) {
+	assignmentId := assignment.Id
+	exerciseClone, err := s.exerciseClone.GetById(ctx, assignment.ExerciseCloneId)
+	if err != nil {
+		return -1, err
+	}
+
+	if exerciseClone.Type == enums.MultipleChoice {
+		exerciseMultipleChoiceClone, err := s.exerciseClone.GetMultipleChoiceExerciseCloneById(ctx, exerciseClone.TypeId)
+		if err != nil {
+			return -1, err
+		}
+		answers, err := s.exerciseClone.GetAnswersByMultipleChoiceCloneId(ctx, exerciseMultipleChoiceClone.Id)
+		if err != nil {
+			return -1, err
+		}
+		assignmentAnswers, err := s.repository.FindMultipleChoiceAnswerByAssignmentId(ctx, assignmentId)
+		if err != nil {
+			return -1, err
+		}
+		mark := s.exerciseMultipleChoiceService.GetMark(ctx, answers, assignmentAnswers)
+
+		return mark, nil
+	}
+
+	return -1, errors.New("not valid")
 
 }

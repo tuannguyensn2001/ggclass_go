@@ -188,3 +188,15 @@ func (s *service) GetMultipleChoiceExerciseClone(ctx context.Context, id int) (*
 
 	return &output, nil
 }
+
+func (s *service) GetById(ctx context.Context, id int) (*models.ExerciseClone, error) {
+	return s.repository.FindById(ctx, id)
+}
+
+func (s *service) GetMultipleChoiceExerciseCloneById(ctx context.Context, id int) (*models.ExerciseMultipleChoiceClone, error) {
+	return s.repository.FindMultipleChoiceCloneById(ctx, id)
+}
+
+func (s *service) GetAnswersByMultipleChoiceCloneId(ctx context.Context, id int) ([]models.ExerciseMultipleChoiceAnswerClone, error) {
+	return s.repository.FindAnswersByMultipleChoiceCloneId(ctx, id)
+}

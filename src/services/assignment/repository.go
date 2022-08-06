@@ -7,11 +7,12 @@ import (
 )
 
 type repository struct {
-	db *gorm.DB
+	db     *gorm.DB
+	origin *gorm.DB
 }
 
 func NewRepository(db *gorm.DB) *repository {
-	return &repository{db: db}
+	return &repository{db: db, origin: db}
 }
 
 func (r *repository) Create(ctx context.Context, assignment *models.Assigment) error {
@@ -50,5 +51,39 @@ func (r *repository) Save(ctx context.Context, assignment *models.Assigment) err
 }
 
 func (r *repository) CreateListAssignmentMultipleChoice(ctx context.Context, list *[]models.AssigmentMultipleChoice) error {
-	return r.db.Create(list).Error
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		for _, item := range *list {
+			err := tx.Create(&item).Error
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
+}
+
+func (r *repository) FindMultipleChoiceAnswerByAssignmentId(ctx context.Context, id int) ([]models.AssigmentMultipleChoice, error) {
+	var result []models.AssigmentMultipleChoice
+	err := r.db.Where("assignment_id = ?", id).Find(&result).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func (r *repository) BeginTransaction() {
+	tx := r.db.Begin()
+	r.db = tx
+}
+
+func (r *repository) Commit() {
+	r.db.Commit()
+	r.db = r.origin
+}
+
+func (r *repository) Rollback() {
+	r.db.Rollback()
+	r.db = r.origin
 }

@@ -79,3 +79,27 @@ func (s *service) GetById(ctx context.Context, id int) (*models.ExerciseMultiple
 func (s *service) GetAnswers(ctx context.Context, exerciseMultipleChoiceId int) ([]models.ExerciseMultipleChoiceAnswer, error) {
 	return s.repository.FindAnswersByMultipleChoiceId(ctx, exerciseMultipleChoiceId)
 }
+
+func (s *service) GetMark(ctx context.Context, answers []models.ExerciseMultipleChoiceAnswerClone, assignmentAnswers []models.AssigmentMultipleChoice) float64 {
+	check := make(map[int]models.ExerciseMultipleChoiceAnswerClone)
+
+	result := float64(0)
+
+	for _, item := range answers {
+		check[item.Id] = item
+	}
+
+	for _, item := range assignmentAnswers {
+		val, ok := check[item.ExerciseMultipleChoiceAnswerCloneId]
+		if !ok {
+			continue
+		}
+
+		if item.Answer == val.Answer {
+			result += val.Mark
+		}
+	}
+
+	return result
+
+}

@@ -4,7 +4,7 @@ create table exercises_multiple_choice_answers_clone (
     "order" int,
     type smallint,
     answer varchar,
-    mark int,
+    mark float,
     created_at timestamp,
     updated_at timestamp,
     deleted_at timestamp
