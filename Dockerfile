@@ -8,7 +8,7 @@ RUN go build -o main src/server/main.go
 FROM alpine:3.16
 WORKDIR /app
 COPY --from=builder /app/main .
-COPY --from=builder /app/.env .
+COPY --from=builder /app/config.yml .
 
 EXPOSE 80
 CMD ["/app/main","server"]
