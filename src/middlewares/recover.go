@@ -4,15 +4,12 @@ import (
 	"ggclass_go/src/app"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
-	"log"
 )
 
 func Recover(ctx *gin.Context) {
 	defer func() {
 		if err := recover(); err != nil {
 			ctx.Header("Content-Type", "application/json")
-
-			log.Println(err)
 
 			if httpError, ok := err.(*app.HttpError); ok {
 				ctx.AbortWithStatusJSON(httpError.StatusCode, httpError)

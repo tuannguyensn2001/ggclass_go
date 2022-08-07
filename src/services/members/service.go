@@ -56,7 +56,13 @@ func (s *service) JoinClass(ctx context.Context, input JoinClassInput) error {
 		return err
 	}
 	if check != nil {
-		return app.ConflictHttpError("pending in class", errors.New("pending in class"))
+		if check.Status == enums.INACTIVE {
+			check.Status = enums.PENDING
+			err = s.repository.Update(ctx, check)
+			return err
+		} else {
+			return app.ConflictHttpError("pending in class", errors.New("pending in class"))
+		}
 	}
 
 	userClass := models.UserClass{
