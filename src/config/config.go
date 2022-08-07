@@ -13,15 +13,16 @@ import (
 )
 
 type Config struct {
-	db           *gorm.DB
-	port         string
-	dbUrl        string
-	secretKey    string
-	pusher       pusher.Client
-	rabbitMQ     *amqp091.Connection
-	rds          *redis.Client
-	IsProduction bool
-	LogService   string
+	db              *gorm.DB
+	port            string
+	dbUrl           string
+	secretKey       string
+	pusher          pusher.Client
+	rabbitMQ        *amqp091.Connection
+	rds             *redis.Client
+	IsProduction    bool
+	LogService      string
+	RealtimeService string
 }
 
 var Cfg Config
@@ -104,7 +105,8 @@ func Load() error {
 			Addr:     "redis-17404.c299.asia-northeast1-1.gce.cloud.redislabs.com:17404",
 			Password: "oVzG4E5NyOWCLaYU1II0021uR6rwj2yp",
 		}),
-		LogService: viper.GetString("logService"),
+		LogService:      viper.GetString("logService"),
+		RealtimeService: viper.GetString("realtimeService"),
 	}
 
 	Cfg = *result

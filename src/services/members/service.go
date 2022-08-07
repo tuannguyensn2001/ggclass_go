@@ -141,7 +141,10 @@ func (s *service) GetIdMembers(ctx context.Context, classId int) ([]int, error) 
 	var ids []int
 
 	for _, item := range list {
-		ids = append(ids, item.UserId)
+		if item.Role == enums.STUDENT {
+			ids = append(ids, item.UserId)
+		}
+
 	}
 
 	return ids, nil

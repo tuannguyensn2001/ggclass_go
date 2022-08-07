@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+package notification;
+
+option go_package = "./notificationpb";
+
+
+message CreateNotificationRequest {
+  string ownerName = 1;
+  string ownerAvatar = 2;
+  int64  createdBy = 3;
+  string htmlContent = 4;
+  int64  classId = 5;
+  string content = 6;
+}
+
+message CreateNotificationResponse {
+  string message = 1;
+  string id = 2;
+}
+
+message Notification {
+  string id = 1;
+  string ownerName = 2;
+  string ownerAvatar = 3;
+  string htmlContent = 4;
+  int64 classId = 5;
+  int64 createdBy = 6;
+  string content = 7;
+  google.protobuf.Timestamp createdAt = 8;
+  google.protobuf.Timestamp updatedAt = 9;
+  int64 seen = 10;
+  int64 type = 11;
+}
+
+message GetNotificationByUserIdRequest {
+  int64  userId = 1;
+}
+
+message GetNotificationByUserIdResponse {
+  repeated Notification data = 1;
+}
+
+message GetNotificationByClassAndTypeRequest {
+  int64 classId = 1;
+  int64 type = 2;
+}
+
+message GetNotificationByClassAndTypeResponse {
+  repeated Notification data = 1;
+}
+
+
+service NotificationService {
+  rpc Create(CreateNotificationRequest) returns (CreateNotificationResponse) {
+
+  }
+  rpc GetByUserId(GetNotificationByUserIdRequest) returns (GetNotificationByUserIdResponse) {
+
+  }
+
+  rpc GetByClassAndType(GetNotificationByClassAndTypeRequest) returns(GetNotificationByClassAndTypeResponse){}
+
+
+}

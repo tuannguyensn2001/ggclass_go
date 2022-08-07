@@ -2,8 +2,16 @@ package notification
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
+	"ggclass_go/src/app"
+	"ggclass_go/src/config"
 	"ggclass_go/src/enums"
 	"ggclass_go/src/models"
+	notificationpb "ggclass_go/src/pb/notification"
+	"github.com/rabbitmq/amqp091-go"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type IRepository interface {
@@ -43,56 +51,264 @@ func (s *service) SetMemberService(memberService IMemberService) {
 
 func (s *service) CreateNotificationFromTeacherToClass(ctx context.Context, input createNotificationFromTeacherToClassInput, userId int) error {
 
+	//user, err := s.userService.GetById(ctx, userId)
+	//if err != nil {
+	//	return err
+	//}
+	//
+	//s.repository.BeginTransaction()
+	//
+	//notificationFromTeacherToClass := models.NotificationFromTeacherToClass{
+	//	ClassId:   input.ClassId,
+	//	Content:   input.Content,
+	//	CreatedBy: userId,
+	//}
+	//err = s.repository.CreateNotificationFromTeacherToClass(ctx, &notificationFromTeacherToClass)
+	//if err != nil {
+	//	s.repository.Rollback()
+	//	return err
+	//}
+	//
+	//notification := models.Notification{
+	//	OwnerAvatar: user.Profile.Avatar,
+	//	OwnerName:   user.Username,
+	//	CreatedBy:   user.Id,
+	//	Type:        enums.NotificationFromTeacherToClass,
+	//	TypeId:      notificationFromTeacherToClass.Id,
+	//	HtmlContent: "Giao vien vua them thong bao vao lop hoc",
+	//}
+	//err = s.repository.CreateNotification(ctx, &notification)
+	//if err != nil {
+	//	s.repository.Rollback()
+	//	return err
+	//}
+	//
+	//s.repository.Commit()
+	//
+	//members, err := s.memberService.GetIdMembers(ctx, input.ClassId)
+	//if err != nil {
+	//	return err
+	//}
+	//
+	//notifications := make([]models.NotificationToUser, len(members))
+	//
+	//for index, item := range members {
+	//	notifications[index] = models.NotificationToUser{
+	//		UserId:         item,
+	//		NotificationId: notification.Id,
+	//		Seen:           0,
+	//	}
+	//}
+	//
+	//go s.repository.CreateNotificationsToUser(ctx, &notifications)
+	//
+	//return nil
+
 	user, err := s.userService.GetById(ctx, userId)
 	if err != nil {
 		return err
 	}
 
-	s.repository.BeginTransaction()
-
-	notificationFromTeacherToClass := models.NotificationFromTeacherToClass{
-		ClassId:   input.ClassId,
-		Content:   input.Content,
-		CreatedBy: userId,
-	}
-	err = s.repository.CreateNotificationFromTeacherToClass(ctx, &notificationFromTeacherToClass)
-	if err != nil {
-		s.repository.Rollback()
-		return err
-	}
-
-	notification := models.Notification{
-		OwnerAvatar: user.Profile.Avatar,
+	request := createNotificationInput{
 		OwnerName:   user.Username,
+		OwnerAvatar: user.Profile.Avatar,
 		CreatedBy:   user.Id,
-		Type:        enums.NotificationFromTeacherToClass,
-		TypeId:      notificationFromTeacherToClass.Id,
-		HtmlContent: "Giao vien vua them thong bao vao lop hoc",
+		HtmlContent: "Giao vien vua them thong bao",
+		ClassId:     input.ClassId,
+		Content:     input.Content,
 	}
-	err = s.repository.CreateNotification(ctx, &notification)
+	id, err := s.Create(ctx, request)
 	if err != nil {
-		s.repository.Rollback()
 		return err
 	}
-
-	s.repository.Commit()
-
 	members, err := s.memberService.GetIdMembers(ctx, input.ClassId)
 	if err != nil {
 		return err
 	}
 
-	notifications := make([]models.NotificationToUser, len(members))
-
-	for index, item := range members {
-		notifications[index] = models.NotificationToUser{
-			UserId:         item,
-			NotificationId: notification.Id,
-			Seen:           0,
-		}
+	notify := notifyToUsers{
+		Id:    id,
+		Users: members,
 	}
 
-	go s.repository.CreateNotificationsToUser(ctx, &notifications)
+	rabbit := config.Cfg.GetRabbitMQ()
+	if rabbit == nil {
+		return errors.New("init rabbit err")
+	}
+
+	ch, err := rabbit.Channel()
+	if err != nil {
+		return err
+	}
+
+	err = ch.ExchangeDeclare("notification", "direct", true, false, false, false, nil)
+	if err != nil {
+		return err
+	}
+
+	body, err := json.Marshal(notify)
+	if err != nil {
+		return err
+	}
+
+	err = ch.Publish("notification", "teacher_create", false, false, amqp091.Publishing{
+		ContentType: "text/plain",
+		Body:        body,
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *service) Create(ctx context.Context, input createNotificationInput) (string, error) {
+	conn, err := grpc.Dial(config.Cfg.RealtimeService, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		return "", err
+	}
+
+	defer conn.Close()
+
+	c := notificationpb.NewNotificationServiceClient(conn)
+
+	r, err := c.Create(ctx, &notificationpb.CreateNotificationRequest{
+		OwnerAvatar: input.OwnerAvatar,
+		OwnerName:   input.OwnerName,
+		CreatedBy:   int64(input.CreatedBy),
+		Content:     input.Content,
+		HtmlContent: input.HtmlContent,
+		ClassId:     int64(input.ClassId),
+	})
+	if err != nil {
+		return "", err
+	}
+
+	return r.Id, nil
+}
+
+func (s *service) GetByClassIdAndType(ctx context.Context, classId int, typeNotification enums.NotificationType) ([]models.NotificationV2, error) {
+	conn, err := grpc.Dial(config.Cfg.RealtimeService, grpc.WithTransportCredentials(insecure.NewCredentials()))
+
+	defer conn.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	c := notificationpb.NewNotificationServiceClient(conn)
+
+	r, err := c.GetByClassAndType(ctx, &notificationpb.GetNotificationByClassAndTypeRequest{
+		ClassId: int64(classId),
+		Type:    int64(typeNotification),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	var result []models.NotificationV2
+
+	if r.Data == nil {
+		return nil, nil
+	}
+
+	for _, item := range r.Data {
+		createdAt := item.CreatedAt.AsTime()
+		updatedAt := item.UpdatedAt.AsTime()
+		result = append(result, models.NotificationV2{
+			Id:          item.Id,
+			OwnerName:   item.OwnerName,
+			OwnerAvatar: item.OwnerAvatar,
+			HtmlContent: item.HtmlContent,
+			ClassId:     int(item.ClassId),
+			CreatedBy:   int(item.CreatedBy),
+			Content:     item.Content,
+			CreatedAt:   &createdAt,
+			UpdatedAt:   &updatedAt,
+		})
+	}
+
+	return result, nil
+
+}
+
+func (s *service) GetByUserId(ctx context.Context, userId int) ([]models.NotificationV2, error) {
+	conn, err := grpc.Dial(config.Cfg.RealtimeService, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	defer conn.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	c := notificationpb.NewNotificationServiceClient(conn)
+
+	r, err := c.GetByUserId(ctx, &notificationpb.GetNotificationByUserIdRequest{
+		UserId: int64(userId),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	var result []models.NotificationV2
+
+	if r.Data == nil {
+		return nil, nil
+	}
+
+	for _, item := range r.Data {
+		//result = append(result,models.NotificationToUserV2{
+		//	Id: item.Id,
+		//	UserId: item.
+		//})
+		createdAt := item.CreatedAt.AsTime()
+		updatedAt := item.UpdatedAt.AsTime()
+		result = append(result, models.NotificationV2{
+			Id:          item.Id,
+			OwnerName:   item.OwnerName,
+			OwnerAvatar: item.OwnerAvatar,
+			HtmlContent: item.HtmlContent,
+			ClassId:     int(item.ClassId),
+			CreatedBy:   int(item.CreatedBy),
+			Content:     item.Content,
+			CreatedAt:   &createdAt,
+			UpdatedAt:   &updatedAt,
+			Seen:        int(item.Seen),
+			Type:        enums.NotificationType(item.Type),
+		})
+	}
+
+	return result, nil
+
+}
+
+func (s *service) SetSeen(ctx context.Context, userId int, notificationId string) error {
+
+	rabbit := config.Cfg.GetRabbitMQ()
+	if rabbit == nil {
+		return app.InternalHttpError("rabbit not setup", errors.New("rabbit not setup"))
+	}
+
+	ch, err := rabbit.Channel()
+	if err != nil {
+		return err
+	}
+
+	input := setSeenInput{
+		UserId:         userId,
+		NotificationId: notificationId,
+	}
+
+	body, err := json.Marshal(input)
+	if err != nil {
+		return err
+	}
+
+	err = ch.Publish("notification", "seen", false, false, amqp091.Publishing{
+		ContentType: "text/plain",
+		Body:        body,
+	})
+
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

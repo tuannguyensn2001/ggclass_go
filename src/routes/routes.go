@@ -40,6 +40,7 @@ func MatchRoutes(r *gin.Engine) {
 
 		v1.GET("/classes/:id/posts", classTransport.GetPosts)
 		v1.GET("/classes/roles", middlewares.Auth, classTransport.GetRoles)
+		v1.GET("/classes/:id/role", middlewares.Auth, classTransport.GetRole)
 		v1.GET("/classes/:id", classTransport.Show)
 
 		v1.POST("/posts", middlewares.Auth, postTransport.Create)
@@ -68,5 +69,8 @@ func MatchRoutes(r *gin.Engine) {
 		v1.POST("/assignments/submit/multiple-choice", assignmentTransport.SubmitMultipleChoiceExercise)
 
 		v1.POST("/notifications/from-teacher-to-class", middlewares.Auth, notificationTransport.CreateNotificationFromTeacherToClass)
+		v1.GET("/notifications/class/:id/from-teacher-to-class", notificationTransport.GetNotificationFromTeacherToUser)
+		v1.GET("/notifications", middlewares.Auth, notificationTransport.GetMyNotification)
+		v1.PUT("/notifications/seen", middlewares.Auth, notificationTransport.SetSeen)
 	}
 }

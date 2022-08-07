@@ -18,6 +18,7 @@ type ClassHttpTransport interface {
 	GetPosts(ctx *gin.Context)
 	Show(ctx *gin.Context)
 	GetRoles(ctx *gin.Context)
+	GetRole(ctx *gin.Context)
 }
 
 type PostHttpTransport interface {
@@ -57,6 +58,9 @@ type AssignmentHttpTransport interface {
 
 type NotificationHttpTransport interface {
 	CreateNotificationFromTeacherToClass(ctx *gin.Context)
+	GetNotificationFromTeacherToUser(ctx *gin.Context)
+	GetMyNotification(ctx *gin.Context)
+	SetSeen(ctx *gin.Context)
 }
 
 type ExerciseCloneHttpTransport interface {

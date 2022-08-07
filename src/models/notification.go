@@ -20,3 +20,17 @@ type Notification struct {
 func (Notification) TableName() string {
 	return "notifications"
 }
+
+type NotificationV2 struct {
+	Id          string                 `json:"id"`
+	OwnerName   string                 `bson:"ownerName,omitempty" json:"ownerName"`
+	OwnerAvatar string                 `bson:"ownerAvatar,omitempty" json:"ownerAvatar"`
+	HtmlContent string                 `bson:"htmlContent,omitempty" json:"htmlContent"`
+	ClassId     int                    `bson:"classId,omitempty" json:"classId"`
+	CreatedBy   int                    `bson:"createdBy,omitempty" json:"createdBy"`
+	Content     string                 `bson:"content,omitempty" json:"content"`
+	CreatedAt   *time.Time             `bson:"createdAt,omitempty" json:"createdAt"`
+	UpdatedAt   *time.Time             `bson:"updatedAt,omitempty" json:"updatedAt"`
+	Type        enums.NotificationType `bson:"type,omitempty" json:"type"`
+	Seen        int                    `json:"seen"`
+}

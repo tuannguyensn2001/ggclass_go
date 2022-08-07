@@ -405,3 +405,14 @@ func (s *service) GetRoles(ctx context.Context, userId int) (*GetRoleOutput, err
 
 	return &GetRoleOutput{Admin: admin, Student: student}, nil
 }
+
+func (s *service) GetRoleByUserId(ctx context.Context, classId int, userId int) (*enums.ClassRole, error) {
+	check, err := s.repository.FindByUserAndClass(ctx, userId, classId)
+	if err != nil {
+		return nil, err
+	}
+	if check.Status != enums.ACTIVE {
+		return nil, app.ConflictHttpError("user not active in class", errors.New("user not active in class"))
+	}
+	return &check.Role, nil
+}

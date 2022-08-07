@@ -23,3 +23,8 @@ type submitMultipleChoiceInput struct {
 		Answer string `form:"answer" binding:"required"`
 	} `form:"answers" binding:"required"`
 }
+
+type notifyToUsers struct {
+	Id    string `json:"id"`
+	Users []int  `json:"users"`
+}

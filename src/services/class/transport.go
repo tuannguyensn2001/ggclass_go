@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"ggclass_go/src/app"
+	"ggclass_go/src/enums"
 	"ggclass_go/src/models"
 	"ggclass_go/src/util"
 	"github.com/gin-gonic/gin"
@@ -22,6 +23,7 @@ type IService interface {
 	GetPosts(ctx context.Context, classId int) ([]models.Post, error)
 	GetById(ctx context.Context, id int) (*models.Class, error)
 	GetRoles(ctx context.Context, classId int) (*GetRoleOutput, error)
+	GetRoleByUserId(ctx context.Context, classId int, userId int) (*enums.ClassRole, error)
 }
 
 type httpTransport struct {
@@ -213,4 +215,25 @@ func (t *httpTransport) GetRoles(ctx *gin.Context) {
 		"message": "done",
 		"data":    result,
 	})
+}
+
+func (t *httpTransport) GetRole(ctx *gin.Context) {
+	id := ctx.Param("id")
+	classId, err := strconv.Atoi(id)
+	if err != nil {
+		panic(app.BadRequestHttpError("data not valid", err))
+	}
+
+	userId, err := util.GetUserIdFromContext(ctx)
+	if err != nil {
+		panic(err)
+	}
+
+	result, err := t.service.GetRoleByUserId(ctx, classId, userId)
+	if err != nil {
+		panic(err)
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"data": result})
+
 }
