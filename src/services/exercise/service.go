@@ -9,6 +9,7 @@ import (
 	"ggclass_go/src/enums"
 	"ggclass_go/src/models"
 	"ggclass_go/src/packages/validate"
+	"github.com/gookit/event"
 	"gorm.io/gorm"
 	"time"
 )
@@ -213,6 +214,8 @@ func (s *service) EditMultipleChoice(ctx context.Context, id int, input editExer
 	s.repository.Commit()
 
 	go s.exerciseCloneService.StartClone(ctx, exercise.Id)
+
+	event.MustFire("update-exercise", event.M{"exerciseId": id})
 
 	return nil
 }
