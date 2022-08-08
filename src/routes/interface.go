@@ -31,6 +31,7 @@ type ExerciseHttpTransport interface {
 	EditMultipleChoice(ctx *gin.Context)
 	GetMultipleChoice(ctx *gin.Context)
 	GetByClassId(ctx *gin.Context)
+	GetDetailMultipleChoice(ctx *gin.Context)
 }
 
 type CommentHttpTransport interface {

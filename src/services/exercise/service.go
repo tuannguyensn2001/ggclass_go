@@ -258,3 +258,61 @@ func (s *service) GetMultipleChoiceExercise(ctx context.Context, id int) (*getMu
 
 	return &output, nil
 }
+
+func (s *service) GetDetailMultipleChoice(ctx context.Context, id int) (*getMultipleChoiceDetailOutput, error) {
+	exercise, err := s.repository.FindById(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	if exercise.Type != enums.MultipleChoice {
+		return nil, app.ConflictHttpError("type is not valid", errors.New("type is not valid"))
+	}
+	multipleChoice, err := s.repository.FindMultipleChoiceById(ctx, exercise.TypeId)
+	if err != nil {
+		return nil, err
+	}
+
+	answers, err := s.repository.FindAnswersByMultipleChoiceId(ctx, multipleChoice.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	responseAnswer := make([]MultipleChoiceAnswerInput, len(answers))
+
+	for index, item := range answers {
+		responseAnswer[index] = MultipleChoiceAnswerInput{
+			Order:  item.Order,
+			Mark:   item.Mark,
+			Answer: item.Answer,
+		}
+	}
+
+	output := getMultipleChoiceDetailOutput{
+		MultipleChoice: MultipleChoiceInput{
+			NumberOfQuestions: multipleChoice.NumberOfQuestions,
+			Mark:              multipleChoice.Mark,
+			FileQuestionUrl:   multipleChoice.FileQuestionUrl,
+			Answers:           responseAnswer,
+		},
+		Id:                  exercise.Id,
+		Name:                exercise.Name,
+		Password:            exercise.Password,
+		TimeToDo:            exercise.TimeToDo,
+		TimeStart:           exercise.TimeStart,
+		TimeEnd:             exercise.TimeEnd,
+		IsTest:              exercise.IsTest,
+		PreventViewQuestion: exercise.PreventViewQuestion,
+		RoleStudent:         exercise.RoleStudent,
+		NumberOfTimeToDo:    exercise.NumberOfTimeToDo,
+		Mode:                exercise.Mode,
+		ClassId:             exercise.ClassId,
+		CreatedBy:           exercise.CreatedBy,
+		CreatedAt:           exercise.CreatedAt,
+		UpdatedAt:           exercise.UpdatedAt,
+		Type:                exercise.Type,
+		TypeId:              exercise.TypeId,
+	}
+
+	return &output, nil
+
+}

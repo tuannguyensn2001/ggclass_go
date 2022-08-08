@@ -49,6 +49,7 @@ func MatchRoutes(r *gin.Engine) {
 		v1.POST("/exercises/multiple-choice", middlewares.Auth, exerciseTransport.CreateMultipleChoice)
 		v1.PUT("/exercises/multiple-choice/:id", middlewares.Auth, exerciseTransport.EditMultipleChoice)
 		v1.GET("/exercises/multiple-choice/:id", exerciseTransport.GetMultipleChoice)
+		v1.GET("/exercises/multiple-choice/:id/edit", middlewares.Auth, exerciseTransport.GetDetailMultipleChoice)
 		v1.GET("/exercises", exerciseTransport.GetByClassId)
 
 		v1.GET("/exercises/clone/multiple-choice/:id", exerciseCloneTransport.GetMultipleChoice)

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"ggclass_go/src/app"
 	"ggclass_go/src/models"
+	"ggclass_go/src/packages/logger"
 	"ggclass_go/src/util"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -16,6 +17,7 @@ type IService interface {
 	EditMultipleChoice(ctx context.Context, id int, input editExerciseMultipleChoiceInput) error
 	GetByClassId(ctx context.Context, classId int) ([]models.Exercise, error)
 	GetMultipleChoiceExercise(ctx context.Context, id int) (*getMultipleChoiceOutput, error)
+	GetDetailMultipleChoice(ctx context.Context, id int) (*getMultipleChoiceDetailOutput, error)
 }
 
 type httpTransport struct {
@@ -105,6 +107,26 @@ func (t *httpTransport) GetMultipleChoice(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{
 		"message": "done",
 		"data":    result,
+	})
+
+}
+
+func (t *httpTransport) GetDetailMultipleChoice(ctx *gin.Context) {
+	logger.Sugar().Info("request")
+	id := ctx.Param("id")
+	exerciseId, err := strconv.Atoi(id)
+	if err != nil {
+		panic(app.BadRequestHttpError("data not valid", err))
+	}
+
+	result, err := t.service.GetDetailMultipleChoice(ctx, exerciseId)
+	if err != nil {
+		panic(err)
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"data":    result,
+		"message": "done",
 	})
 
 }
