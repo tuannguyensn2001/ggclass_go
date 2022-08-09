@@ -9,6 +9,7 @@ import (
 	"ggclass_go/src/services/exercise_clone"
 	"ggclass_go/src/services/exercise_multiple_choice"
 	"ggclass_go/src/services/folder"
+	"ggclass_go/src/services/lesson"
 	"ggclass_go/src/services/members"
 	"ggclass_go/src/services/notification"
 	"ggclass_go/src/services/post"
@@ -95,4 +96,9 @@ func buildNotificationTransport() NotificationHttpTransport {
 func buildExerciseCloneTransport() ExerciseCloneHttpTransport {
 	service := exercise_clone.BuildService()
 	return exercise_clone.NewHttpTransport(service)
+}
+
+func buildLessonTransport() LessonHttpTransport {
+	service := lesson.BuildService()
+	return lesson.NewHttpTransport(service)
 }

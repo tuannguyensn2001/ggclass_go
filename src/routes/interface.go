@@ -67,3 +67,10 @@ type NotificationHttpTransport interface {
 type ExerciseCloneHttpTransport interface {
 	GetMultipleChoice(ctx *gin.Context)
 }
+
+type LessonHttpTransport interface {
+	Create(ctx *gin.Context)
+	Edit(ctx *gin.Context)
+	GetByFolderId(ctx *gin.Context)
+	GetDetail(ctx *gin.Context)
+}
