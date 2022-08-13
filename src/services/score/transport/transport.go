@@ -10,7 +10,7 @@ import (
 )
 
 type IService interface {
-	GetScore(ctx context.Context, classId int) (*score_struct.GetScoreOutput, error)
+	GetScore(ctx context.Context, classId int) ([]score_struct.GetScoreOutput, error)
 }
 
 type httpTransport struct {

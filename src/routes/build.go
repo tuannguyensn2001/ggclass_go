@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"ggclass_go/src/config"
 	"ggclass_go/src/services/assignment"
 	"ggclass_go/src/services/auth"
 	"ggclass_go/src/services/class"
@@ -14,6 +15,7 @@ import (
 	"ggclass_go/src/services/notification"
 	"ggclass_go/src/services/post"
 	"ggclass_go/src/services/profile"
+	score_repository "ggclass_go/src/services/score/repository"
 	score_service "ggclass_go/src/services/score/service"
 	score_transport "ggclass_go/src/services/score/transport"
 	"ggclass_go/src/services/user"
@@ -106,7 +108,10 @@ func buildLessonTransport() LessonHttpTransport {
 }
 
 func buildScoreTransport() ScoreHttpTransport {
-	service := score_service.NewService(nil)
+	service := score_service.NewService(score_repository.NewRepository(config.Cfg.GetDB()))
+	service.SetExerciseService(exercise.NewService(exercise.NewRepository(config.Cfg.GetDB())))
+	service.SetUserService(user.BuildService())
 	transport := score_transport.NewHttpTransport(service)
+
 	return transport
 }

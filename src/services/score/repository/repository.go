@@ -1,4 +1,4 @@
-package repository
+package score_repository
 
 import (
 	"context"

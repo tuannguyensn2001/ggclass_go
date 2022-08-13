@@ -1,9 +1,11 @@
 package score_struct
 
 type GetScoreOutput struct {
-	Name   string                `json:"name"`
-	Avatar string                `json:"avatar"`
-	Scores []ExerciseScoreOutput `json:"scores"`
+	Id      int                   `json:"id"`
+	Name    string                `json:"name"`
+	Avatar  string                `json:"avatar"`
+	Scores  []ExerciseScoreOutput `json:"scores"`
+	Average float64               `json:"average"`
 }
 
 type ExerciseScoreOutput struct {
