@@ -14,6 +14,8 @@ import (
 	"ggclass_go/src/services/notification"
 	"ggclass_go/src/services/post"
 	"ggclass_go/src/services/profile"
+	score_service "ggclass_go/src/services/score/service"
+	score_transport "ggclass_go/src/services/score/transport"
 	"ggclass_go/src/services/user"
 )
 
@@ -101,4 +103,10 @@ func buildExerciseCloneTransport() ExerciseCloneHttpTransport {
 func buildLessonTransport() LessonHttpTransport {
 	service := lesson.BuildService()
 	return lesson.NewHttpTransport(service)
+}
+
+func buildScoreTransport() ScoreHttpTransport {
+	service := score_service.NewService(nil)
+	transport := score_transport.NewHttpTransport(service)
+	return transport
 }

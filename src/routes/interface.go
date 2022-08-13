@@ -74,3 +74,7 @@ type LessonHttpTransport interface {
 	GetByFolderId(ctx *gin.Context)
 	GetDetail(ctx *gin.Context)
 }
+
+type ScoreHttpTransport interface {
+	GetScore(ctx *gin.Context)
+}

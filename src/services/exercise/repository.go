@@ -117,3 +117,14 @@ func (r *repository) FindExerciseCloneByExerciseIdAndVersion(ctx context.Context
 	}
 	return &result, nil
 }
+
+func (r *repository) FindByIds(ctx context.Context, ids []int) ([]models.Exercise, error) {
+	var result []models.Exercise
+
+	err := r.db.Where("id IN ?", ids).Find(&result).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}

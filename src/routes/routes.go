@@ -19,6 +19,7 @@ func MatchRoutes(r *gin.Engine) {
 	notificationTransport := buildNotificationTransport()
 	exerciseCloneTransport := buildExerciseCloneTransport()
 	lessonTransport := buildLessonTransport()
+	scoreTransport := buildScoreTransport()
 
 	r.GET("/", func(context *gin.Context) {
 		context.JSON(http.StatusOK, gin.H{
@@ -79,5 +80,7 @@ func MatchRoutes(r *gin.Engine) {
 		v1.PUT("/lessons/:id", middlewares.Auth, lessonTransport.Edit)
 		v1.GET("/lessons", lessonTransport.GetByFolderId)
 		v1.GET("/lessons/:id", lessonTransport.GetDetail)
+
+		v1.GET("/scores/class/:id", scoreTransport.GetScore)
 	}
 }

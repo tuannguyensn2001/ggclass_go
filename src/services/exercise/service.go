@@ -30,6 +30,7 @@ type IRepository interface {
 	DeleteAnswersByMultipleChoiceId(ctx context.Context, id int) error
 	FindByClassId(ctx context.Context, classId int) ([]models.Exercise, error)
 	FindExerciseCloneByExerciseIdAndVersion(ctx context.Context, exerciseId int, version int) (*models.ExerciseClone, error)
+	FindByIds(ctx context.Context, ids []int) ([]models.Exercise, error)
 }
 
 type service struct {
@@ -318,4 +319,8 @@ func (s *service) GetDetailMultipleChoice(ctx context.Context, id int) (*getMult
 
 	return &output, nil
 
+}
+
+func (s *service) GetByIds(ctx context.Context, ids []int) ([]models.Exercise, error) {
+	return s.repository.FindByIds(ctx, ids)
 }
