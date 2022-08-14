@@ -8,6 +8,7 @@ type StartAssignmentInput struct {
 type createLogInput struct {
 	AssignmentId int    `form:"assignmentId" binding:"required" json:"assignmentId"`
 	Action       string `form:"action" binding:"required" json:"action" `
+	UserId       int    `json:"userId"`
 }
 
 type userCreateAnswerInput struct {

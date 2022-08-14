@@ -111,7 +111,7 @@ func buildLessonTransport() LessonHttpTransport {
 
 func buildScoreTransport() ScoreHttpTransport {
 	service := score_service.NewService(score_repository.NewRepository(config.Cfg.GetDB()))
-	service.SetExerciseService(exercise.NewService(exercise.NewRepository(config.Cfg.GetDB())))
+	service.SetExerciseService(exercise.BuildService())
 	service.SetUserService(user.BuildService())
 	transport := score_transport.NewHttpTransport(service)
 

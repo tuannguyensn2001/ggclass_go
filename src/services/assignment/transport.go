@@ -13,7 +13,7 @@ import (
 type IService interface {
 	Start(ctx context.Context, input StartAssignmentInput) (*models.Assigment, error)
 	CreateLog(ctx context.Context, input createLogInput) error
-	GetLogs(ctx context.Context, assignmentId int) ([]models.LogAssignment, error)
+	GetLogs(ctx context.Context, assignmentId int, userId int) ([]models.LogAssignment, error)
 	SubmitMultipleChoiceExercise(ctx context.Context, input submitMultipleChoiceInput) error
 }
 
@@ -54,7 +54,14 @@ func (t *httpTransport) CreateLog(ctx *gin.Context) {
 		panic(app.BadRequestHttpError("data not valid", err))
 	}
 
-	err := t.service.CreateLog(ctx.Request.Context(), input)
+	userId, err := util.GetUserIdFromContext(ctx)
+	if err != nil {
+		panic(err)
+	}
+
+	input.UserId = userId
+
+	err = t.service.CreateLog(ctx.Request.Context(), input)
 
 	if err != nil {
 		panic(err)
@@ -72,7 +79,12 @@ func (t *httpTransport) GetLogs(ctx *gin.Context) {
 	if err != nil {
 		panic(app.BadRequestHttpError("data not valid", err))
 	}
-	result, err := t.service.GetLogs(ctx.Request.Context(), assignmentId)
+	userId := ctx.Query("userId")
+	userIdInt, err := strconv.Atoi(userId)
+	if err != nil {
+		panic(err)
+	}
+	result, err := t.service.GetLogs(ctx.Request.Context(), assignmentId, userIdInt)
 	if err != nil {
 		panic(err)
 	}

@@ -9,7 +9,7 @@ import (
 	"ggclass_go/src/config"
 	"ggclass_go/src/enums"
 	"ggclass_go/src/models"
-	logsAssignmentpb "ggclass_go/src/pb"
+	logsAssignmentpb "ggclass_go/src/pb/logs_assignment"
 	"github.com/gookit/event"
 	"github.com/rabbitmq/amqp091-go"
 	"google.golang.org/grpc"
@@ -112,7 +112,7 @@ func (s *service) CreateLog(ctx context.Context, input createLogInput) error {
 	return nil
 }
 
-func (s *service) GetLogs(ctx context.Context, assignmentId int) ([]models.LogAssignment, error) {
+func (s *service) GetLogs(ctx context.Context, assignmentId int, userId int) ([]models.LogAssignment, error) {
 	conn, err := grpc.Dial(config.Cfg.LogService, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, err
@@ -122,7 +122,7 @@ func (s *service) GetLogs(ctx context.Context, assignmentId int) ([]models.LogAs
 
 	c := logsAssignmentpb.NewLogAssignmentServiceClient(conn)
 
-	r, err := c.GetLogAssignmentByAssignment(ctx, &logsAssignmentpb.GetLogAssignmentByAssignmentRequest{AssignmentId: int64(assignmentId)})
+	r, err := c.GetLogAssignmentByAssignment(ctx, &logsAssignmentpb.GetLogAssignmentByAssignmentRequest{AssignmentId: int64(assignmentId), UserId: int64(userId)})
 	if err != nil {
 		return nil, err
 	}
@@ -134,6 +134,7 @@ func (s *service) GetLogs(ctx context.Context, assignmentId int) ([]models.LogAs
 			AssignmentId: int(item.AssignmentId),
 			Action:       item.Action,
 			Id:           item.Id,
+			UserId:       int(item.UserId),
 		})
 	}
 
