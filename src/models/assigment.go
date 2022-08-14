@@ -16,6 +16,7 @@ type Assigment struct {
 	CreatedAt       *time.Time      `gorm:"column:created_at;" json:"createdAt"`
 	UpdatedAt       *time.Time      `gorm:"column:updated_at" json:"updatedAt"`
 	DeletedAt       *gorm.DeletedAt `json:"deletedAt"`
+	Exercise        *Exercise       `json:"exercise"`
 }
 
 func (e Assigment) TableName() string {

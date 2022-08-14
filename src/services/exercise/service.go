@@ -9,6 +9,7 @@ import (
 	"ggclass_go/src/enums"
 	"ggclass_go/src/models"
 	"ggclass_go/src/packages/validate"
+	exercise_struct "ggclass_go/src/services/exercise/struct"
 	"github.com/gookit/event"
 	"gorm.io/gorm"
 	"time"
@@ -31,15 +32,21 @@ type IRepository interface {
 	FindByClassId(ctx context.Context, classId int) ([]models.Exercise, error)
 	FindExerciseCloneByExerciseIdAndVersion(ctx context.Context, exerciseId int, version int) (*models.ExerciseClone, error)
 	FindByIds(ctx context.Context, ids []int) ([]models.Exercise, error)
+	CountStudentsDoExercises(ctx context.Context, exerciseIds []int) ([]exercise_struct.CountMemberDoExercise, error)
 }
 
 type service struct {
 	repository           IRepository
 	exerciseCloneService IExerciseCloneService
+	classService         IClassService
 }
 
 type IExerciseCloneService interface {
 	StartClone(ctx context.Context, exerciseId int) (int, error)
+}
+
+type IClassService interface {
+	CountStudentsInClass(ctx context.Context, classId int) (int, error)
 }
 
 func NewService(repository IRepository) *service {
@@ -48,6 +55,10 @@ func NewService(repository IRepository) *service {
 
 func (s *service) SetExerciseCloneService(exerciseCloneService IExerciseCloneService) {
 	s.exerciseCloneService = exerciseCloneService
+}
+
+func (s *service) SetClassService(service IClassService) {
+	s.classService = service
 }
 
 func (s *service) CreateMultipleChoice(ctx context.Context, input CreateExerciseMultipleChoiceInput, userId int) (*models.Exercise, error) {
@@ -227,6 +238,28 @@ func (s *service) GetByClassId(ctx context.Context, classId int) ([]models.Exerc
 		return nil, err
 	}
 
+	count, err := s.classService.CountStudentsInClass(ctx, classId)
+	if err != nil {
+		return nil, err
+	}
+
+	ids := make([]int, len(list))
+
+	for _, item := range list {
+		ids = append(ids, item.Id)
+	}
+
+	queryCountExercise, err := s.repository.CountStudentsDoExercises(ctx, ids)
+	if err != nil {
+		return nil, err
+	}
+
+	mapQueryCountExercise := make(map[int]int)
+
+	for _, item := range queryCountExercise {
+		mapQueryCountExercise[item.ExerciseId] = item.Count
+	}
+
 	for index, item := range list {
 		clone, err := s.repository.FindExerciseCloneByExerciseIdAndVersion(ctx, item.Id, item.Version)
 		if err != nil {
@@ -234,6 +267,13 @@ func (s *service) GetByClassId(ctx context.Context, classId int) ([]models.Exerc
 		}
 
 		list[index].ExerciseCloneId = clone.Id
+		list[index].TotalMembersInClass = count
+		val, ok := mapQueryCountExercise[item.Id]
+		if !ok {
+			list[index].TotalMembersDoExercise = 0
+		} else {
+			list[index].TotalMembersDoExercise = val
+		}
 
 	}
 

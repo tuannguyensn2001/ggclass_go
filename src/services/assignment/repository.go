@@ -40,7 +40,7 @@ func (r *repository) FindByAssignmentIdAndExerciseMultipleChoiceAnswerCloneId(ct
 
 func (r *repository) FindById(ctx context.Context, id int) (*models.Assigment, error) {
 	var result models.Assigment
-	if err := r.db.Where("id = ?", id).First(&result).Error; err != nil {
+	if err := r.db.Preload("Exercise.Class").Where("id = ?", id).First(&result).Error; err != nil {
 		return nil, err
 	}
 	return &result, nil

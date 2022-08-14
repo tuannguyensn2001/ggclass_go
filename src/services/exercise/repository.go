@@ -3,6 +3,7 @@ package exercise
 import (
 	"context"
 	"ggclass_go/src/models"
+	exercise_struct "ggclass_go/src/services/exercise/struct"
 	"gorm.io/gorm"
 )
 
@@ -127,4 +128,17 @@ func (r *repository) FindByIds(ctx context.Context, ids []int) ([]models.Exercis
 	}
 
 	return result, nil
+}
+
+func (r *repository) CountStudentsDoExercises(ctx context.Context, exerciseIds []int) ([]exercise_struct.CountMemberDoExercise, error) {
+	var result []exercise_struct.CountMemberDoExercise
+
+	err := r.db.Raw(`select exercise_id,count(distinct user_id) from assignments where exercise_id in ? and is_submit = ? group by exercise_id`, exerciseIds, 1).Find(&result).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+
 }

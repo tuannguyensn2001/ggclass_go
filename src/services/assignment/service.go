@@ -10,6 +10,7 @@ import (
 	"ggclass_go/src/enums"
 	"ggclass_go/src/models"
 	logsAssignmentpb "ggclass_go/src/pb"
+	"github.com/gookit/event"
 	"github.com/rabbitmq/amqp091-go"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -172,6 +173,7 @@ func (s *service) UserCreateAnswerMultipleChoice(ctx context.Context, input user
 }
 
 func (s *service) SubmitMultipleChoiceExercise(ctx context.Context, input submitMultipleChoiceInput) error {
+
 	assignment, err := s.repository.FindById(ctx, input.AssignmentId)
 	if err != nil {
 		return err
@@ -224,6 +226,8 @@ func (s *service) SubmitMultipleChoiceExercise(ctx context.Context, input submit
 
 	s.repository.Commit()
 
+	event.MustFire("user_done_test", event.M{"assignmentId": input.AssignmentId})
+
 	return nil
 
 }
@@ -255,4 +259,8 @@ func (s *service) MarkAssignment(ctx context.Context, assignment *models.Assigme
 
 	return -1, errors.New("not valid")
 
+}
+
+func (s *service) GetById(ctx context.Context, assignmentId int) (*models.Assigment, error) {
+	return s.repository.FindById(ctx, assignmentId)
 }

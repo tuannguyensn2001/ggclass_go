@@ -54,6 +54,7 @@ func buildExerciseTransport() ExerciseHttpTransport {
 	exerciseCloneService.SetExerciseMultipleChoiceService(exercise_multiple_choice.BuildService())
 
 	service.SetExerciseCloneService(exerciseCloneService)
+	service.SetClassService(class.BuildService())
 	transport := exercise.NewHttpTransport(service)
 	return transport
 }
@@ -94,6 +95,7 @@ func buildAssignmentTransport() AssignmentHttpTransport {
 
 func buildNotificationTransport() NotificationHttpTransport {
 	service := notification.BuildService()
+	service.SetAssignmentService(assignment.BuildService())
 	return notification.NewHttpTransport(service)
 }
 

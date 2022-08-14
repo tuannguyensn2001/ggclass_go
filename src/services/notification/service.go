@@ -24,9 +24,11 @@ type IRepository interface {
 }
 
 type service struct {
-	repository    IRepository
-	userService   IUserService
-	memberService IMemberService
+	repository        IRepository
+	userService       IUserService
+	memberService     IMemberService
+	assignmentService IAssignmentService
+	classService      IClassService
 }
 
 type IUserService interface {
@@ -35,6 +37,14 @@ type IUserService interface {
 
 type IMemberService interface {
 	GetIdMembers(ctx context.Context, classId int) ([]int, error)
+}
+
+type IAssignmentService interface {
+	GetById(ctx context.Context, assignmentId int) (*models.Assigment, error)
+}
+
+type IClassService interface {
+	GetIdTeachersInClass(ctx context.Context, classId int) ([]int, error)
 }
 
 func NewService(repository IRepository) *service {
@@ -47,6 +57,14 @@ func (s *service) SetUserService(userService IUserService) {
 
 func (s *service) SetMemberService(memberService IMemberService) {
 	s.memberService = memberService
+}
+
+func (s *service) SetAssignmentService(service IAssignmentService) {
+	s.assignmentService = service
+}
+
+func (s *service) SetClassService(service IClassService) {
+	s.classService = service
 }
 
 func (s *service) CreateNotificationFromTeacherToClass(ctx context.Context, input createNotificationFromTeacherToClassInput, userId int) error {
@@ -116,6 +134,7 @@ func (s *service) CreateNotificationFromTeacherToClass(ctx context.Context, inpu
 		HtmlContent: "Giao vien vua them thong bao",
 		ClassId:     input.ClassId,
 		Content:     input.Content,
+		Type:        enums.NotificationFromTeacherToClass,
 	}
 	id, err := s.Create(ctx, request)
 	if err != nil {
@@ -179,6 +198,7 @@ func (s *service) Create(ctx context.Context, input createNotificationInput) (st
 		Content:     input.Content,
 		HtmlContent: input.HtmlContent,
 		ClassId:     int64(input.ClassId),
+		Type:        int64(input.Type),
 	})
 	if err != nil {
 		return "", err
@@ -306,6 +326,74 @@ func (s *service) SetSeen(ctx context.Context, userId int, notificationId string
 		Body:        body,
 	})
 
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *service) CreateNotificationUserDoneTest(ctx context.Context, assignmentId int) error {
+
+	assignment, err := s.assignmentService.GetById(ctx, assignmentId)
+	if err != nil {
+		return err
+	}
+
+	user, err := s.userService.GetById(ctx, assignment.UserId)
+	if err != nil {
+		return err
+	}
+
+	request := createNotificationInput{
+		OwnerName:   user.Username,
+		OwnerAvatar: user.Profile.Avatar,
+		CreatedBy:   user.Id,
+		HtmlContent: "Thi sinh vua lam xong bai thi",
+		ClassId:     assignment.Exercise.ClassId,
+		Content:     "lam xong bai thi",
+		Type:        enums.NotificationUserDoneTest,
+	}
+
+	id, err := s.Create(ctx, request)
+	if err != nil {
+		return err
+	}
+
+	teachers, err := s.classService.GetIdTeachersInClass(ctx, assignment.Exercise.ClassId)
+	if err != nil {
+		return err
+	}
+
+	notify := notifyToUsers{
+		Id:    id,
+		Users: teachers,
+	}
+
+	rabbit := config.Cfg.GetRabbitMQ()
+	if rabbit == nil {
+		return errors.New("init rabbit err")
+	}
+
+	ch, err := rabbit.Channel()
+	if err != nil {
+		return err
+	}
+
+	err = ch.ExchangeDeclare("notification", "direct", true, false, false, false, nil)
+	if err != nil {
+		return err
+	}
+
+	body, err := json.Marshal(notify)
+	if err != nil {
+		return err
+	}
+
+	err = ch.Publish("notification", "user_done_test", false, false, amqp091.Publishing{
+		ContentType: "text/plain",
+		Body:        body,
+	})
 	if err != nil {
 		return err
 	}

@@ -1,8 +1,11 @@
 package routes
 
 import (
+	"context"
 	"ggclass_go/src/middlewares"
+	"ggclass_go/src/services/notification"
 	"github.com/gin-gonic/gin"
+	"github.com/gookit/event"
 	"net/http"
 )
 
@@ -20,6 +23,17 @@ func MatchRoutes(r *gin.Engine) {
 	exerciseCloneTransport := buildExerciseCloneTransport()
 	lessonTransport := buildLessonTransport()
 	scoreTransport := buildScoreTransport()
+
+	go func() {
+		event.On("user_done_test", event.ListenerFunc(func(e event.Event) error {
+			assignmentId := e.Data()["assignmentId"].(int)
+			service := notification.BuildService()
+
+			service.CreateNotificationUserDoneTest(context.Background(), assignmentId)
+
+			return nil
+		}))
+	}()
 
 	r.GET("/", func(context *gin.Context) {
 		context.JSON(http.StatusOK, gin.H{

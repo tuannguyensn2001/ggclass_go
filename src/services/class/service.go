@@ -30,6 +30,8 @@ type IRepository interface {
 	FindById(ctx context.Context, id int) (*models.Class, error)
 	FindByCode(ctx context.Context, code string) (*models.Class, error)
 	GetAll(ctx context.Context) ([]models.Class, error)
+	CountStudentsInClass(ctx context.Context, classId int) (int, error)
+	GetActiveTeachersByClass(ctx context.Context, classId int) ([]models.UserClass, error)
 }
 
 type IUserService interface {
@@ -415,4 +417,24 @@ func (s *service) GetRoleByUserId(ctx context.Context, classId int, userId int) 
 		return nil, app.ConflictHttpError("user not active in class", errors.New("user not active in class"))
 	}
 	return &check.Role, nil
+}
+
+func (s *service) CountStudentsInClass(ctx context.Context, classId int) (int, error) {
+	return s.repository.CountStudentsInClass(ctx, classId)
+}
+
+func (s *service) GetIdTeachersInClass(ctx context.Context, classId int) ([]int, error) {
+	list, err := s.repository.GetActiveTeachersByClass(ctx, classId)
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]int, len(list))
+
+	for index, item := range list {
+		result[index] = item.UserId
+	}
+
+	return result, nil
+
 }

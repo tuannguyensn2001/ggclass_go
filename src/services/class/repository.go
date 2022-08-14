@@ -171,3 +171,24 @@ func (r *repository) GetAll(ctx context.Context) ([]models.Class, error) {
 	}
 	return result, nil
 }
+
+func (r *repository) CountStudentsInClass(ctx context.Context, classId int) (int, error) {
+	count := 0
+
+	err := r.db.Raw(`select count(id) from user_class where class_id = ? and role = ? and status = ?`, classId, enums.STUDENT, enums.ACTIVE).Scan(&count).Error
+
+	return count, err
+
+}
+
+func (r *repository) GetActiveTeachersByClass(ctx context.Context, classId int) ([]models.UserClass, error) {
+	var ids []models.UserClass
+
+	err := r.db.Model(models.UserClass{}).Where("class_id = ?", classId).Where("status = ?", enums.ACTIVE).Where("role = ?", enums.ADMIN).Find(&ids).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return ids, nil
+}

@@ -1,5 +1,7 @@
 package notification
 
+import "ggclass_go/src/enums"
+
 type createNotificationFromTeacherToClassInput struct {
 	ClassId int    `form:"classId" binding:"required"`
 	Content string `form:"content" binding:"required"`
@@ -12,6 +14,7 @@ type createNotificationInput struct {
 	HtmlContent string
 	ClassId     int
 	Content     string
+	Type        enums.NotificationType
 }
 
 type notifyToUsers struct {
