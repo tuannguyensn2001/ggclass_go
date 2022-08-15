@@ -1,0 +1,1 @@
+alter table folders add is_root int;

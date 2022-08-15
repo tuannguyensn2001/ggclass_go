@@ -1,0 +1,1 @@
+alter table folders drop column is_root;

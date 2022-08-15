@@ -47,3 +47,35 @@ func (r *repository) FindByQuery(ctx context.Context, query GetFoldersQuery) ([]
 	return result, nil
 
 }
+
+func (r *repository) GetNumberFolderInClass(ctx context.Context, classId int) (int, error) {
+	result := 0
+	err := r.db.Raw(`select count(id) from folders where class_id = ?`, classId).Scan(&result).Error
+
+	return result, err
+
+}
+
+func (r *repository) GetRootFolderInClass(ctx context.Context, classId int) (*models.Folder, error) {
+	var result models.Folder
+
+	err := r.db.Where("class_id = ?", classId).Where("is_root = ?", 1).First(&result).Error
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+
+}
+
+func (r *repository) FindById(ctx context.Context, id int) (*models.Folder, error) {
+	var result models.Folder
+
+	err := r.db.Where("id = ?", id).First(&result).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+
+}

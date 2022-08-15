@@ -5,6 +5,7 @@ import (
 	"errors"
 	"ggclass_go/src/app"
 	"ggclass_go/src/models"
+	youtubepkg "ggclass_go/src/packages/youtube"
 	"gorm.io/gorm"
 )
 
@@ -34,12 +35,19 @@ func (s *service) Create(ctx context.Context, input CreateLessonInput, userId in
 		return nil, err
 	}
 
+	id, err := youtubepkg.GetIdFromLink(input.YoutubeLink)
+	if err != nil {
+		return nil, err
+	}
+	thumbnail := youtubepkg.GetLinkThumbnailFromId(id)
+
 	lesson := models.Lesson{
 		Name:        input.Name,
 		Description: input.Description,
 		FolderId:    input.FolderId,
 		YoutubeLink: input.YoutubeLink,
 		CreatedBy:   userId,
+		Thumbnail:   thumbnail,
 	}
 
 	err = s.repository.Create(ctx, &lesson)

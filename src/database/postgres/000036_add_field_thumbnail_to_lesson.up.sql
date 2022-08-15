@@ -1,0 +1,1 @@
+alter table lessons add thumbnail varchar;

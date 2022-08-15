@@ -13,4 +13,5 @@ type Folder struct {
 	CreatedAt *time.Time      `gorm:"column:created_at;" json:"createdAt"`
 	UpdatedAt *time.Time      `gorm:"column:updated_at" json:"updatedAt"`
 	DeletedAt *gorm.DeletedAt `json:"deletedAt"`
+	IsRoot    int             `gorm:"column:is_root;" json:"isRoot"`
 }
